@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BookVerse</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header class="navbar">
+    <div class="logo">
+        <img src="/images/logo.png" alt="eBook Store Logo" />
+        <span>BookVerse | Online Computer Book Store</span>
+    </div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/about">About</a>
+      <a href="/books">View Books</a>
+      <a href="/contact">Contact</a>
+      <a href="/reviews">Feedback</a>
+      <a href="/login" class="btn">Login</a>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <h1>Online Computer Book Store</h1>
+    <p>
+      Buy and manage computer books online in soft copy or hard copy format
+      with a secure and user-friendly system.
+    </p>
+    <a href="/books" class="btn-primary">Browse Books</a>
+  </section>
+
+<!-- Featured Books -->
+<section class="books-section">
+  <h2>Featured Books</h2>
+
+  <div class="book-grid">
+    <div class="book-card">
+      <img src="/images/book1.jpg" alt="Java Programming Book">
+      <h3>Java Programming</h3>
+      <p class="price">₹499</p>
+      <button onclick="addToCart()">Add to Cart</button>
+    </div>
+
+    <div class="book-card">
+      <img src="/images/book2.jpg" alt="DSA Book">
+      <h3>Web Development</h3>
+      <p class="price">₹599</p>
+      <button onclick="addToCart()">Add to Cart</button>
+    </div>
+
+    <div class="book-card">
+      <img src="/images/book3.jpg" alt="WebProgramming Book">
+      <h3>Data Structures</h3>
+      <p class="price">₹699</p>
+      <button onclick="addToCart()">Add to Cart</button>
+    </div>
+  </div>
+</section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="feature-card">
+      <h3>Soft Copy Books</h3>
+      <p>
+        Get instant access to eBooks delivered directly to your registered
+        email address.
+      </p>
+    </div>
+
+    <div class="feature-card">
+      <h3>Hard Copy Books</h3>
+      <p>
+        Order printed books and get them delivered to your doorstep within
+        a few working days.
+      </p>
+    </div>
+
+    <div class="feature-card">
+      <h3>Secure Payments</h3>
+      <p>
+        Make safe and reliable online payments using secure payment methods.
+      </p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>© 2026 BookVerse – Online Computer Book Store. All Rights Reserved.</p>
+  </footer>
+
+  <!-- JS -->
+<script>
+  function addToCart() {
+    const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+    if (isLoggedIn === "true") {
+      window.location.href = "/cart";
+    } else {
+      alert("Please login or signup to add books to cart.");
+      window.location.href = "/login";
+    }
+  }
+</script>
+
+</body>
+</html>

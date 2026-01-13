@@ -76,66 +76,70 @@
 
   <!-- JS -->
 <script>
-  async function handleLogin(event) {
-    event.preventDefault();
+async function handleLogin(event) {
+  event.preventDefault();
 
-    const input = document.getElementById("loginInput").value.trim();
-    const password = document.getElementById("passwordInput").value;
-    const error = document.getElementById("loginError");
+  const input = document.getElementById("loginInput").value.trim();
+  const password = document.getElementById("passwordInput").value;
+  const error = document.getElementById("loginError");
 
-    error.textContent = "";
+  error.textContent = "";
 
-    // Phone validation
-    if (/^\d+$/.test(input)) {
-      if (input.length !== 10) {
-        error.textContent = "Phone number must be exactly 10 digits.";
-        return;
-      }
+  // Phone validation
+  if (/^\d+$/.test(input)) {
+    if (input.length !== 10) {
+      error.textContent = "Phone number must be exactly 10 digits.";
+      return;
     }
-    // Email validation
-    else {
-      if (!input.includes("@")) {
-        error.textContent = "@ is missing in email address.";
-        return;
-      }
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailPattern.test(input)) {
-        error.textContent = "Incorrect email format.";
-        return;
-      }
+  } else {
+    if (!input.includes("@")) {
+      error.textContent = "@ is missing in email address.";
+      return;
     }
-
-    try {
-      const response = await fetch("/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          loginInput: input,
-          password: password
-        })
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        localStorage.setItem("isLoggedIn", "true");
-        window.location.href = "/";
-      } else {
-        error.textContent = result.message || "Invalid login credentials.";
-      }
-
-    } catch (err) {
-      error.textContent = "Server error. Please try again later.";
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(input)) {
+      error.textContent = "Incorrect email format.";
+      return;
     }
   }
 
-  function togglePassword() {
-    const pwd = document.getElementById("passwordInput");
-    pwd.type = pwd.type === "password" ? "text" : "password";
+  try {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        emailOrPhone: input,   // ✅ FIXED
+        password: password
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      error.textContent = result.message;
+      return;
+    }
+
+    // ✅ LOGIN SUCCESS
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("userName", result.user.name);
+    localStorage.setItem("userId", result.user.id); 
+
+    window.location.href = "/";
+
+  } catch (err) {
+    error.textContent = "Server error. Please try again later.";
   }
+}
+
+function togglePassword() {
+  const pwd = document.getElementById("passwordInput");
+  pwd.type = pwd.type === "password" ? "text" : "password";
+}
 </script>
+
 
 
 

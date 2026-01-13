@@ -374,3 +374,56 @@ input[type="password"]::-ms-clear {
 input[type="password"]::-webkit-textfield-decoration-container {
   display: none;
 }
+
+.cart-section {
+  max-width: 900px;
+  margin: 60px auto;
+  padding: 20px;
+}
+
+.cart-item {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  background: #fff;
+  margin-bottom: 12px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.cart-item img {
+  width: 80px;
+  height: 100px;
+  object-fit: cover;
+}
+
+.cart-summary {
+  text-align: right;
+  margin-top: 20px;
+}
+
+
+.cart-item button {
+  background: crimson;
+  color: #fff;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.cart-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 15px;
+}
+
+.cart-icon {
+  font-size: 20px;
+  margin-left: 15px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.cart-icon:hover {
+  color: #93c5fd;
+}

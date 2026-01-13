@@ -1,31 +1,31 @@
-const authRoutes = require("./routes/auth.routes");
-
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-
 const path = require("path");
+
+const authRoutes = require("./routes/auth.routes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+const orderRoutes = require("./routes/order.routes");
 
 // Middleware
 app.use(express.json());
-app.use("/api/auth", authRoutes);
-
 app.use(express.urlencoded({ extended: true }));
+app.use("/api/order", orderRoutes);
 
-// Static files (CSS, images, uploads)
+// Static files
 app.use(express.static(path.join(__dirname, "public")));
 
-// ================= ROUTES ================= //
+// API routes
+app.use("/api/auth", authRoutes);
 
-// Home Page (root)
+// ================= PAGES ================= //
+
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// Common pages
 app.get("/about", (req, res) => {
   res.sendFile(path.join(__dirname, "views/about.html"));
 });
@@ -58,7 +58,6 @@ app.get("/refund", (req, res) => {
   res.sendFile(path.join(__dirname, "views/refund.html"));
 });
 
-// Book & Order flow
 app.get("/books", (req, res) => {
   res.sendFile(path.join(__dirname, "views/books.html"));
 });
@@ -79,7 +78,6 @@ app.get("/success", (req, res) => {
   res.sendFile(path.join(__dirname, "views/success.html"));
 });
 
-// Orders & feedback
 app.get("/my-orders", (req, res) => {
   res.sendFile(path.join(__dirname, "views/my-orders.html"));
 });
@@ -92,12 +90,11 @@ app.get("/reviews", (req, res) => {
   res.sendFile(path.join(__dirname, "views/reviews.html"));
 });
 
-// Seller
 app.get("/seller", (req, res) => {
   res.sendFile(path.join(__dirname, "views/seller.html"));
 });
 
-// 404 Page (optional but good)
+// 404
 app.use((req, res) => {
   res.status(404).send("404 - Page Not Found");
 });
@@ -107,9 +104,8 @@ app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
 
-mongoose.connect(process.env.MONGO_URI)
+// MongoDB
+mongoose
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ MongoDB Error:", err));
-console.log("MONGO_URI:", process.env.MONGO_URI);
-
-  

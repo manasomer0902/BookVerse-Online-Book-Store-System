@@ -3,42 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BookVerse</title>
+  <title>BookVerse | Online Computer Book Store</title>
+
+  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
   <link rel="stylesheet" href="/css/styles.css">
+
+  <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 </head>
 <body>
 
-  <!-- Navbar -->
-  <header class="navbar">
-     <a href="/" class="logo">
-        <img src="/images/logo.png" alt="eBook Store Logo" />
-        <span>BookVerse | Online Computer Book Store</span>
-     </a>
-    <nav>
-      <a href="/" class="active">Home</a>
-      <a href="/about">About</a>
-      <a href="/books">View Books</a>
-      <a href="/contact">Contact</a>
-      <a href="/reviews">Feedback</a>
+<!-- ================= NAVBAR ================= -->
+<header class="navbar">
+  <a href="/" class="logo">
+    <img src="/images/logo.png" alt="BookVerse Logo">
+    <span>BookVerse | Online Computer Book Store</span>
+  </a>
 
-      <a href="/login" class="btn login-btn">Login</a>
-      <a href="/signup" class="btn signup-btn">Sign Up</a>   
-     </nav>
-  </header>
+  <nav>
+    <a href="/" class="active">Home</a>
+    <a href="/about">About</a>
+    <a href="/books">View Books</a>
+    <a href="/contact">Contact</a>
+    <a href="/reviews">Feedback</a>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <h1>Online Computer Book Store</h1>
-    <p>
-      Buy and manage computer books online in soft copy or hard copy format
-      with a secure and user-friendly system.
-    </p>
-    <a href="/books" class="btn-primary">Browse Books</a>
-  </section>
+    <!-- My Orders (visible only when logged in) -->
+    <span id="myOrdersLink"></span>
 
-<!-- Featured Books -->
+    <!-- Cart Icon -->
+    <a href="#" class="cart-icon" onclick="openCart()" title="My Cart">🛒</a>
+
+    <!-- Auth Area -->
+    <span id="authArea"></span>
+  </nav>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <h1>Online Computer Book Store</h1>
+  <p>
+    Buy and manage computer books online in soft copy or hard copy format
+    with a secure and user-friendly system.
+  </p>
+  <a href="/books" class="btn-primary">Browse Books</a>
+</section>
+
+<!-- ================= FEATURED BOOKS ================= -->
 <section class="books-section">
   <h2>Featured Books</h2>
 
@@ -47,67 +60,113 @@
       <img src="/images/book1.jpg" alt="Java Programming Book">
       <h3>Java Programming</h3>
       <p class="price">₹499</p>
-      <button onclick="addToCart()">Add to Cart</button>
+      <button onclick="addToCart('Java Programming', 499, '/images/book1.jpg')">
+        Add to Cart
+      </button>
     </div>
 
     <div class="book-card">
-      <img src="/images/book2.jpg" alt="DSA Book">
+      <img src="/images/book2.jpg" alt="Web Development Book">
       <h3>Web Development</h3>
       <p class="price">₹599</p>
-      <button onclick="addToCart()">Add to Cart</button>
+      <button onclick="addToCart('Web Development', 599, '/images/book2.jpg')">
+        Add to Cart
+      </button>
     </div>
 
     <div class="book-card">
-      <img src="/images/book3.jpg" alt="WebProgramming Book">
+      <img src="/images/book3.jpg" alt="Data Structures Book">
       <h3>Data Structures</h3>
       <p class="price">₹699</p>
-      <button onclick="addToCart()">Add to Cart</button>
+      <button onclick="addToCart('Data Structures', 699, '/images/book3.jpg')">
+        Add to Cart
+      </button>
     </div>
   </div>
 </section>
 
-  <!-- Features Section -->
-  <section class="features">
-    <div class="feature-card">
-      <h3>Soft Copy Books</h3>
-      <p>
-        Get instant access to eBooks delivered directly to your registered
-        email address.
-      </p>
-    </div>
+<!-- ================= FEATURES ================= -->
+<section class="features">
+  <div class="feature-card">
+    <h3>Soft Copy Books</h3>
+    <p>Get instant access to eBooks delivered directly to your email.</p>
+  </div>
 
-    <div class="feature-card">
-      <h3>Hard Copy Books</h3>
-      <p>
-        Order printed books and get them delivered to your doorstep within
-        a few working days.
-      </p>
-    </div>
+  <div class="feature-card">
+    <h3>Hard Copy Books</h3>
+    <p>Printed books delivered to your doorstep within a few days.</p>
+  </div>
 
-    <div class="feature-card">
-      <h3>Secure Payments</h3>
-      <p>
-        Make safe and reliable online payments using secure payment methods.
-      </p>
-    </div>
-  </section>
+  <div class="feature-card">
+    <h3>Secure Payments</h3>
+    <p>Safe and reliable online payment methods.</p>
+  </div>
+</section>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <p>© 2026 BookVerse – Online Computer Book Store. All Rights Reserved.</p>
-  </footer>
+<!-- ================= FOOTER ================= -->
+<footer class="footer">
+  <p>© 2026 BookVerse – Online Computer Book Store. All Rights Reserved.</p>
+</footer>
 
-  <!-- JS -->
+<!-- ================= JAVASCRIPT ================= -->
 <script>
-  function addToCart() {
-    const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
+  const userName = localStorage.getItem("userName");
 
-    if (isLoggedIn === "true") {
+  const authArea = document.getElementById("authArea");
+  const myOrdersLink = document.getElementById("myOrdersLink");
+
+  // Navbar authentication UI
+  if (isLoggedIn === "true") {
+    authArea.innerHTML = `
+      <span class="user-name">👤 ${userName || "User"}</span>
+      <a href="#" class="btn login-btn" onclick="logout()">Logout</a>
+    `;
+    myOrdersLink.innerHTML = `<a href="/my-orders">My Orders</a>`;
+  } else {
+    authArea.innerHTML = `
+      <a href="/login" class="btn login-btn">Login</a>
+      <a href="/signup" class="btn signup-btn">Sign Up</a>
+    `;
+    myOrdersLink.innerHTML = ``;
+  }
+
+  // Logout function
+  function logout() {
+    localStorage.clear();
+    window.location.href = "/";
+  }
+
+  // Open Cart from icon
+  function openCart() {
+    if (localStorage.getItem("isLoggedIn") === "true") {
       window.location.href = "/cart";
     } else {
-      alert("Please login or signup to add books to cart.");
+      alert("Please login to view your cart.");
       window.location.href = "/login";
     }
+  }
+
+  // Add to cart logic
+  function addToCart(name, price, image) {
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+      alert("Please login to add items to cart.");
+      window.location.href = "/login";
+      return;
+    }
+
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    const existing = cart.find(item => item.name === name);
+
+    if (existing) {
+      existing.qty += 1;
+    } else {
+      cart.push({ name, price, qty: 1, image });
+    }
+
+    localStorage.setItem("cart", JSON.stringify(cart));
+    alert("Book added to cart!");
   }
 </script>
 

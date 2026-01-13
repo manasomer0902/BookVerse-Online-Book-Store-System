@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Cart | BookVerse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="navbar">
+  <a href="/" class="logo">
+    <img src="/images/logo.png">
+    <span>BookVerse</span>
+  </a>
+</header>
+
+<!-- CART SECTION -->
+<section class="cart-section">
+  <h2>My Cart</h2>
+
+  <div id="cartItems"></div>
+
+  <div class="cart-summary">
+    <h3>Total: ₹<span id="totalAmount">0</span></h3>
+    <button class="btn-primary" onclick="proceedToOrder()">Proceed to Order</button>
+  </div>
+</section>
+
+<script>
+const userId = localStorage.getItem("userId");
+const isLoggedIn = localStorage.getItem("isLoggedIn");
+
+if (isLoggedIn !== "true" || !userId) {
+  alert("Please login to view cart");
+  window.location.href = "/login";
+}
+
+// Fetch cart from MongoDB
+async function loadCart() {
+  try {
+    const res = await fetch(`/api/order/cart/${userId}`);
+    const data = await res.json();
+
+    const cartItemsDiv = document.getElementById("cartItems");
+    const totalAmountSpan = document.getElementById("totalAmount");
+
+    cartItemsDiv.innerHTML = "";
+
+    if (!data.items || data.items.length === 0) {
+      cartItemsDiv.innerHTML = "<p>Your cart is empty.</p>";
+      totalAmountSpan.innerText = "0";
+      return;
+    }
+
+    data.items.forEach(item => {
+      cartItemsDiv.innerHTML += `
+        <div class="cart-item">
+          <img src="${item.image}">
+          <div>
+            <h4>${item.name}</h4>
+            <p>₹${item.price} × ${item.quantity}</p>
+          </div>
+        </div>
+      `;
+    });
+
+    totalAmountSpan.innerText = data.totalAmount;
+
+  } catch (err) {
+    alert("Failed to load cart");
+  }
+}
+
+function proceedToOrder() {
+  window.location.href = "/order";
+}
+
+loadCart();
+</script>
+
+</body>
+</html>

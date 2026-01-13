@@ -3,7 +3,7 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 
 body {
@@ -19,6 +19,7 @@ body {
   gap: 10px;
   font-size: 22px;
   font-weight: bold;
+  margin-left: -16px;
 }
 
 .logo img {
@@ -32,7 +33,7 @@ body {
 .navbar {
   background-color: #1f2933;
   color: #ffffff;
-  padding: 15px 40px;
+  padding: 15px 28px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -50,6 +51,18 @@ body {
   padding: 8px 14px;
   border-radius: 4px;
 }
+
+.login-btn {
+  background-color: #2563eb;
+}
+
+.signup-btn {
+  background-color: transparent;
+  border: 1px solid #2563eb;
+  color: #2563eb;
+  margin-left: 10px;
+}
+
 
 /* ===== Hero Section ===== */
 .hero {
@@ -168,4 +181,23 @@ body {
   padding: 15px;
   margin-top: 60px;
   font-size: 14px;
+}
+
+@media (max-width: 900px) {
+  .navbar {
+    flex-wrap: wrap;
+  }
+
+  .navbar nav {
+    width: 100%;
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .navbar nav a {
+    margin-left: 0;
+  }
 }

@@ -124,8 +124,8 @@ async function handleLogin(event) {
 
     // ✅ LOGIN SUCCESS
     localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("userId", result.user.id);
     localStorage.setItem("userName", result.user.name);
-    localStorage.setItem("userId", result.user.id); 
 
     window.location.href = "/";
 

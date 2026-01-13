@@ -4,24 +4,25 @@ const mongoose = require("mongoose");
 const path = require("path");
 
 const authRoutes = require("./routes/auth.routes");
+const orderRoutes = require("./routes/order.routes");
+const cartRoutes = require("./routes/cart.routes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const orderRoutes = require("./routes/order.routes");
 
-// Middleware
+// ================= MIDDLEWARE =================
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use("/api/order", orderRoutes);
 
-// Static files
+// ================= STATIC FILES =================
 app.use(express.static(path.join(__dirname, "public")));
 
-// API routes
+// ================= API ROUTES =================
 app.use("/api/auth", authRoutes);
+app.use("/api/order", orderRoutes);
+app.use("/api/cart", cartRoutes); // ✅ CORRECT PLACE
 
-// ================= PAGES ================= //
-
+// ================= PAGES =================
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
 });
@@ -94,17 +95,17 @@ app.get("/seller", (req, res) => {
   res.sendFile(path.join(__dirname, "views/seller.html"));
 });
 
-// 404
+// ================= 404 =================
 app.use((req, res) => {
   res.status(404).send("404 - Page Not Found");
 });
 
-// Start server
+// ================= SERVER =================
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
 });
 
-// MongoDB
+// ================= MONGODB =================
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))

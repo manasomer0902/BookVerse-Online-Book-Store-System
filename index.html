@@ -148,25 +148,38 @@
   }
 
   // Add to cart logic
-  function addToCart(name, price, image) {
-    if (localStorage.getItem("isLoggedIn") !== "true") {
-      alert("Please login to add items to cart.");
+ async function addToCart(name, price, image) {
+    const userId = localStorage.getItem("userId");
+
+    if (!userId) {
+      alert("Please login first");
       window.location.href = "/login";
       return;
     }
 
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    try {
+      const res = await fetch("/api/cart/add-to-cart", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          userId,
+          name,
+          price,
+          image
+        })
+      });
 
-    const existing = cart.find(item => item.name === name);
+      const data = await res.json();
 
-    if (existing) {
-      existing.qty += 1;
-    } else {
-      cart.push({ name, price, qty: 1, image });
+      if (!res.ok) {
+        alert(data.message || "Failed to add to cart");
+        return;
+      }
+
+      alert("Book added to cart!");
+    } catch (err) {
+      alert("Server error while adding to cart");
     }
-
-    localStorage.setItem("cart", JSON.stringify(cart));
-    alert("Book added to cart!");
   }
 </script>
 

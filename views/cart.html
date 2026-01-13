@@ -42,7 +42,7 @@ if (isLoggedIn !== "true" || !userId) {
 // Fetch cart from MongoDB
 async function loadCart() {
   try {
-    const res = await fetch(`/api/order/cart/${userId}`);
+    const res = await fetch(`/api/cart/cart/${userId}`);
     const data = await res.json();
 
     const cartItemsDiv = document.getElementById("cartItems");

@@ -5,28 +5,25 @@ const User = require("../models/User");
 const router = express.Router();
 
 /* =====================
-   SIGNUP API
+   SIGNUP
 ===================== */
 router.post("/signup", async (req, res) => {
   try {
     const { name, emailOrPhone, password } = req.body;
 
     if (!name || !emailOrPhone || !password) {
-      return res.status(400).json({ message: "All fields are required" });
+      return res.status(400).json({
+        success: false,
+        message: "All fields are required"
+      });
     }
 
     let email = null;
     let phone = null;
 
     if (emailOrPhone.includes("@")) {
-      if (!emailOrPhone.includes(".")) {
-        return res.status(400).json({ message: "Invalid email format" });
-      }
       email = emailOrPhone.toLowerCase();
     } else {
-      if (!/^\d{10}$/.test(emailOrPhone)) {
-        return res.status(400).json({ message: "Phone number must be 10 digits" });
-      }
       phone = emailOrPhone;
     }
 
@@ -35,7 +32,10 @@ router.post("/signup", async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(409).json({ message: "User already exists" });
+      return res.status(409).json({
+        success: false,
+        message: "User already exists"
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -49,26 +49,29 @@ router.post("/signup", async (req, res) => {
 
     await user.save();
 
-    res.status(201).json({ message: "Signup successful" });
+    res.status(201).json({
+      success: true,
+      message: "Signup successful"
+    });
 
-  } catch (error) {
-    console.error("Signup Error:", error);
-    res.status(500).json({ message: "Server error" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
   }
 });
 
 /* =====================
-   LOGIN API  ✅ ADD THIS
+   LOGIN
 ===================== */
 router.post("/login", async (req, res) => {
   try {
     const { emailOrPhone, password } = req.body;
 
-    if (!emailOrPhone || !password) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
     let user;
+
     if (emailOrPhone.includes("@")) {
       user = await User.findOne({ email: emailOrPhone.toLowerCase() });
     } else {
@@ -76,30 +79,37 @@ router.post("/login", async (req, res) => {
     }
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials"
+      });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Invalid credentials" });
+    const match = await bcrypt.compare(password, user.password);
+
+    if (!match) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid credentials"
+      });
     }
 
-    // ✅ SINGLE RESPONSE
-    res.status(200).json({
+    res.json({
       success: true,
       message: "Login successful",
       user: {
         id: user._id,
-        name: user.name,
-        email: user.email
+        name: user.name
       }
     });
 
-  } catch (error) {
-    console.error("Login Error:", error);
-    res.status(500).json({ message: "Server error" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({
+      success: false,
+      message: "Server error"
+    });
   }
 });
-
 
 module.exports = router;

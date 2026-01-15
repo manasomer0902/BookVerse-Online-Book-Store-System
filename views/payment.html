@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payment | BookVerse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+<header class="navbar">
+  <a href="/" class="logo">
+    <img src="/images/logo.png">
+    <span>BookVerse</span>
+  </a>
+</header>
+
+<section class="order-section">
+  <div class="order-card">
+    <h2>Payment</h2>
+    <p class="order-subtitle">Demo payment (Amount is real)</p>
+
+    <div class="payment-box">
+      <p><strong>UPI ID:</strong> demo@upi</p>
+      <p><strong>Amount:</strong> ₹<span id="amount">0</span></p>
+
+      <button class="btn-primary full-btn" onclick="makePayment()">
+        Pay Now
+      </button>
+    </div>
+  </div>
+</section>
+
+<script>
+let currentOrderId = null;
+
+// Load real amount
+async function loadPaymentAmount() {
+  const userId = localStorage.getItem("userId");
+
+  if (!userId) {
+    alert("Please login first");
+    window.location.href = "/login";
+    return;
+  }
+
+  const res = await fetch(`/api/order/latest/${userId}`);
+  const order = await res.json();
+
+  if (!res.ok) {
+    alert("No order found");
+    window.location.href = "/";
+    return;
+  }
+
+  document.getElementById("amount").innerText = order.totalAmount;
+  currentOrderId = order._id;
+}
+
+async function makePayment() {
+  if (!currentOrderId) {
+    alert("Order not found");
+    return;
+  }
+
+  // Demo payment
+  const res = await fetch("/api/order/confirm-payment", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderId: currentOrderId })
+  });
+
+  if (res.ok) {
+    alert("Payment Successful (Demo)");
+    window.location.href = "/success";
+  } else {
+    alert("Payment failed");
+  }
+}
+
+loadPaymentAmount();
+</script>
+
+</body>
+</html>

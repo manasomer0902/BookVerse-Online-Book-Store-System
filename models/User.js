@@ -7,19 +7,27 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true
     },
+
     email: {
       type: String,
       lowercase: true,
-      trim: true
+      trim: true,
+      unique: true,
+      sparse: true // allows login via phone only
     },
+
     phone: {
       type: String,
-      length: 10
+      unique: true,
+      sparse: true,
+      match: [/^\d{10}$/, "Phone number must be 10 digits"]
     },
+
     password: {
       type: String,
       required: true
     },
+
     role: {
       type: String,
       enum: ["user", "seller", "admin"],

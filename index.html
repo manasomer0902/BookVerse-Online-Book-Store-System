@@ -5,18 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BookVerse | Online Computer Book Store</title>
 
-  <!-- Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <!-- CSS -->
   <link rel="stylesheet" href="/css/styles.css">
-
-  <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 </head>
 <body>
 
-<!-- ================= NAVBAR ================= -->
 <header class="navbar">
   <a href="/" class="logo">
     <img src="/images/logo.png" alt="BookVerse Logo">
@@ -30,157 +24,128 @@
     <a href="/contact">Contact</a>
     <a href="/reviews">Feedback</a>
 
-    <!-- My Orders (visible only when logged in) -->
     <span id="myOrdersLink"></span>
 
-    <!-- Cart Icon -->
-    <a href="#" class="cart-icon" onclick="openCart()" title="My Cart">🛒</a>
+    <a href="#" class="cart-icon" onclick="openCart()">
+      🛒 <span id="cartCount" class="cart-badge">0</span>
+    </a>
 
-    <!-- Auth Area -->
     <span id="authArea"></span>
   </nav>
 </header>
 
-<!-- ================= HERO ================= -->
 <section class="hero">
   <h1>Online Computer Book Store</h1>
-  <p>
-    Buy and manage computer books online in soft copy or hard copy format
-    with a secure and user-friendly system.
-  </p>
+  <p>Buy and manage computer books online.</p>
   <a href="/books" class="btn-primary">Browse Books</a>
 </section>
 
-<!-- ================= FEATURED BOOKS ================= -->
 <section class="books-section">
   <h2>Featured Books</h2>
 
   <div class="book-grid">
     <div class="book-card">
-      <img src="/images/book1.jpg" alt="Java Programming Book">
+      <img src="/images/book1.jpg">
       <h3>Java Programming</h3>
       <p class="price">₹499</p>
-      <button onclick="addToCart('Java Programming', 499, '/images/book1.jpg')">
-        Add to Cart
-      </button>
+      <button onclick="addToCart('Java Programming', 499, '/images/book1.jpg')">Add to Cart</button>
     </div>
 
     <div class="book-card">
-      <img src="/images/book2.jpg" alt="Web Development Book">
+      <img src="/images/book2.jpg">
       <h3>Web Development</h3>
       <p class="price">₹599</p>
-      <button onclick="addToCart('Web Development', 599, '/images/book2.jpg')">
-        Add to Cart
-      </button>
+      <button onclick="addToCart('Web Development', 599, '/images/book2.jpg')">Add to Cart</button>
     </div>
 
     <div class="book-card">
-      <img src="/images/book3.jpg" alt="Data Structures Book">
+      <img src="/images/book3.jpg">
       <h3>Data Structures</h3>
       <p class="price">₹699</p>
-      <button onclick="addToCart('Data Structures', 699, '/images/book3.jpg')">
-        Add to Cart
-      </button>
+      <button onclick="addToCart('Data Structures', 699, '/images/book3.jpg')">Add to Cart</button>
     </div>
   </div>
 </section>
 
-<!-- ================= FEATURES ================= -->
-<section class="features">
-  <div class="feature-card">
-    <h3>Soft Copy Books</h3>
-    <p>Get instant access to eBooks delivered directly to your email.</p>
-  </div>
-
-  <div class="feature-card">
-    <h3>Hard Copy Books</h3>
-    <p>Printed books delivered to your doorstep within a few days.</p>
-  </div>
-
-  <div class="feature-card">
-    <h3>Secure Payments</h3>
-    <p>Safe and reliable online payment methods.</p>
-  </div>
-</section>
-
-<!-- ================= FOOTER ================= -->
 <footer class="footer">
-  <p>© 2026 BookVerse – Online Computer Book Store. All Rights Reserved.</p>
+  <p>© 2026 BookVerse – All Rights Reserved.</p>
 </footer>
 
-<!-- ================= JAVASCRIPT ================= -->
 <script>
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
-  const userName = localStorage.getItem("userName");
+const authArea = document.getElementById("authArea");
+const myOrdersLink = document.getElementById("myOrdersLink");
+const cartCountEl = document.getElementById("cartCount");
 
-  const authArea = document.getElementById("authArea");
-  const myOrdersLink = document.getElementById("myOrdersLink");
+const isLoggedIn = localStorage.getItem("isLoggedIn");
+const userName = localStorage.getItem("userName");
 
-  // Navbar authentication UI
-  if (isLoggedIn === "true") {
-    authArea.innerHTML = `
-      <span class="user-name">👤 ${userName || "User"}</span>
-      <a href="#" class="btn login-btn" onclick="logout()">Logout</a>
-    `;
-    myOrdersLink.innerHTML = `<a href="/my-orders">My Orders</a>`;
+if (isLoggedIn === "true") {
+  authArea.innerHTML = `
+    <span class="user-name">👤 ${userName || "User"}</span>
+    <a href="#" class="btn login-btn" onclick="logout()">Logout</a>
+  `;
+  myOrdersLink.innerHTML = `<a href="/my-orders">My Orders</a>`;
+} else {
+  authArea.innerHTML = `
+    <a href="/login" class="btn login-btn">Login</a>
+    <a href="/signup" class="btn signup-btn">Sign Up</a>
+  `;
+}
+
+function logout() {
+  localStorage.clear();
+  window.location.href = "/";
+}
+
+function openCart() {
+  if (localStorage.getItem("isLoggedIn") === "true") {
+    window.location.href = "/cart";
   } else {
-    authArea.innerHTML = `
-      <a href="/login" class="btn login-btn">Login</a>
-      <a href="/signup" class="btn signup-btn">Sign Up</a>
-    `;
-    myOrdersLink.innerHTML = ``;
+    alert("Please login first");
+    window.location.href = "/login";
   }
+}
 
-  // Logout function
-  function logout() {
-    localStorage.clear();
-    window.location.href = "/";
-  }
+// ✅ FIXED ENDPOINT
+async function loadCartCount() {
+  const userId = localStorage.getItem("userId");
+  if (!userId) return;
 
-  // Open Cart from icon
-  function openCart() {
-    if (localStorage.getItem("isLoggedIn") === "true") {
-      window.location.href = "/cart";
-    } else {
-      alert("Please login to view your cart.");
-      window.location.href = "/login";
-    }
-  }
+  try {
+    const res = await fetch(`/api/cart/cart/${userId}`);
+    const data = await res.json();
 
-  // Add to cart logic
- async function addToCart(name, price, image) {
-    const userId = localStorage.getItem("userId");
-
-    if (!userId) {
-      alert("Please login first");
-      window.location.href = "/login";
-      return;
+    let count = 0;
+    if (data.items) {
+      data.items.forEach(i => count += i.quantity);
     }
 
-    try {
-      const res = await fetch("/api/cart/add-to-cart", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userId,
-          name,
-          price,
-          image
-        })
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        alert(data.message || "Failed to add to cart");
-        return;
-      }
-
-      alert("Book added to cart!");
-    } catch (err) {
-      alert("Server error while adding to cart");
-    }
+    cartCountEl.innerText = count;
+  } catch {
+    cartCountEl.innerText = 0;
   }
+}
+
+loadCartCount();
+
+async function addToCart(name, price, image) {
+  const userId = localStorage.getItem("userId");
+
+  if (!userId) {
+    alert("Please login first");
+    window.location.href = "/login";
+    return;
+  }
+
+  await fetch("/api/cart/add-to-cart", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userId, name, price, image })
+  });
+
+  loadCartCount(); // 🔥 instant update
+  alert("Book added to cart");
+}
 </script>
 
 </body>

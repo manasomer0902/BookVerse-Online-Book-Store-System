@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Place Order | BookVerse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<header class="navbar">
+  <a href="/" class="logo">
+    <img src="/images/logo.png" alt="BookVerse">
+    <span>BookVerse</span>
+  </a>
+</header>
+
+<!-- ================= ORDER SECTION ================= -->
+<section class="order-section">
+  <div class="order-card">
+    <h2>Order Details</h2>
+    <p class="order-subtitle">Please fill your delivery information</p>
+
+    <form onsubmit="placeOrder(event)">
+      <div class="form-grid">
+
+        <input type="text" id="name" placeholder="Full Name" required>
+        <input type="text" id="phone" placeholder="Phone Number" required>
+        <input type="email" id="email" placeholder="Email Address" required>
+
+        <input type="text" id="address" placeholder="Full Address" required>
+        <input type="text" id="city" placeholder="City" required>
+        <input type="text" id="state" placeholder="State" required>
+        <input type="text" id="pincode" placeholder="Pincode" required>
+
+        <select id="bookType" required>
+          <option value="">Select Book Type</option>
+          <option value="Soft Copy">Soft Copy (Email)</option>
+          <option value="Hard Copy">Hard Copy (Home Delivery)</option>
+        </select>
+
+      </div>
+
+      <button type="submit" class="btn-primary full-btn">
+        Proceed to Payment
+      </button>
+    </form>
+  </div>
+</section>
+
+<!-- ================= JAVASCRIPT ================= -->
+<script>
+async function placeOrder(event) {
+  event.preventDefault();
+
+  const userId = localStorage.getItem("userId");
+
+  if (!userId) {
+    alert("Please login first");
+    window.location.href = "/login";
+    return;
+  }
+
+  const customerDetails = {
+    name: document.getElementById("name").value.trim(),
+    phone: document.getElementById("phone").value.trim(),
+    email: document.getElementById("email").value.trim(),
+    address: document.getElementById("address").value.trim(),
+    city: document.getElementById("city").value.trim(),
+    state: document.getElementById("state").value.trim(),
+    pincode: document.getElementById("pincode").value.trim()
+  };
+
+  const bookType = document.getElementById("bookType").value;
+
+  if (!bookType) {
+    alert("Please select book type");
+    return;
+  }
+
+  try {
+    const res = await fetch("/api/order/create", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        customerDetails,
+        bookType
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Order failed");
+      return;
+    }
+
+    // Save orderId for payment step
+    localStorage.setItem("latestOrderId", data.orderId);
+
+    // Go to payment
+    window.location.href = "/payment";
+
+
+  } catch (err) {
+    alert("Server error. Please try again later.");
+  }
+}
+</script>
+
+</body>
+</html>

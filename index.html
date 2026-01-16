@@ -46,23 +46,23 @@
   <div class="book-grid">
     <div class="book-card">
       <img src="/images/book1.jpg">
-      <h3>Java Programming</h3>
+      <h3>Java Programming Simplified</h3>
       <p class="price">₹499</p>
-      <button onclick="addToCart('Java Programming', 499, '/images/book1.jpg')">Add to Cart</button>
+      <button onclick="addToCart('Java-Programming-Simplified', 499, '/images/book1.jpg')">Add to Cart</button>
     </div>
 
     <div class="book-card">
       <img src="/images/book2.jpg">
-      <h3>Web Development</h3>
+      <h3>Data Structures & Algorithms</h3>
       <p class="price">₹599</p>
-      <button onclick="addToCart('Web Development', 599, '/images/book2.jpg')">Add to Cart</button>
+      <button onclick="addToCart('Data-Structures & Algorithms', 599, '/images/book2.jpg')">Add to Cart</button>
     </div>
 
     <div class="book-card">
       <img src="/images/book3.jpg">
-      <h3>Data Structures</h3>
+      <h3>Web Proramming with HTML, CSS and JavaScript</h3>
       <p class="price">₹699</p>
-      <button onclick="addToCart('Data Structures', 699, '/images/book3.jpg')">Add to Cart</button>
+      <button onclick="addToCart('Web Programming with Html Css and Javascript', 699, '/images/book3.jpg')">Add to Cart</button>
     </div>
   </div>
 </section>
@@ -112,7 +112,7 @@ async function loadCartCount() {
   if (!userId) return;
 
   try {
-    const res = await fetch(`/api/cart/cart/${userId}`);
+    const res = await fetch(`/api/cart/${userId}`);
     const data = await res.json();
 
     let count = 0;

@@ -19,6 +19,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // ===== STATIC FILES =====
 app.use(express.static(path.join(__dirname, "public")));
+app.use("/secure-books", express.static(path.join(__dirname, "public/books")));
 
 // ===== API ROUTES =====
 app.use("/api/auth", authRoutes);

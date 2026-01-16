@@ -54,54 +54,46 @@ async function loadOrders() {
   const div = document.getElementById("orders");
   div.innerHTML = "";
 
-  if (orders.length === 0) {
-    div.innerHTML = "<p>No orders found.</p>";
+  if (!orders || orders.length === 0) {
+    div.innerHTML = "<p>No orders found yet.</p>";
     return;
   }
 
   orders.forEach(order => {
+    let statusColor =
+      order.orderStatus === "Confirmed" ? "green" :
+      order.orderStatus === "Pending" ? "orange" : "red";
+
     let cancelBtn = "";
 
     if (order.orderStatus === "Confirmed") {
       cancelBtn = `
-        <button onclick="cancelOrder('${order._id}')"
-          style="margin-top:10px"
-          class="btn-primary">
+        <button class="btn-primary" onclick="cancelOrder('${order._id}')">
           Cancel Order
         </button>
       `;
     }
 
     div.innerHTML += `
-      <div class="order-card">
+      <div class="order-card" style="margin-bottom:15px">
         <p><strong>Order ID:</strong> ${order._id}</p>
         <p><strong>Total:</strong> ₹${order.totalAmount}</p>
-        <p><strong>Status:</strong> ${order.orderStatus}</p>
+        <p>
+          <strong>Status:</strong>
+          <span style="color:${statusColor}">
+            ${order.orderStatus}
+          </span>
+        </p>
         <p><strong>Refund:</strong> ${order.refundStatus}</p>
         ${cancelBtn}
-        <hr>
       </div>
     `;
   });
 }
 
-async function cancelOrder(orderId) {
-  if (!confirm("Are you sure you want to cancel this order?")) return;
-
-  const res = await fetch("/api/order/cancel", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ orderId })
-  });
-
-  const data = await res.json();
-
-  alert(data.message);
-  loadOrders();
-}
-
 loadOrders();
 </script>
+
 
 
 </body>

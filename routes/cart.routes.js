@@ -41,11 +41,7 @@ router.post("/add-to-cart", async (req, res) => {
     cart.totalAmount += price;
     await cart.save();
 
-    res.json({
-      success: true,
-      message: "Item added to cart",
-      cart
-    });
+    res.json({ success: true });
 
   } catch (err) {
     console.error("ADD TO CART ERROR:", err);
@@ -54,20 +50,35 @@ router.post("/add-to-cart", async (req, res) => {
 });
 
 /* ==========================
-   GET CART
+   GET CART (FOR CART PAGE)
    GET /api/cart/:userId
 ========================== */
 router.get("/:userId", async (req, res) => {
   try {
     const cart = await Cart.findOne({ userId: req.params.userId });
-
     if (!cart) {
       return res.json({ items: [], totalAmount: 0 });
     }
-
     res.json(cart);
   } catch (err) {
     console.error("GET CART ERROR:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+/* ==========================
+   GET CART (FOR HOME BADGE)
+   GET /api/cart/cart/:userId
+========================== */
+router.get("/cart/:userId", async (req, res) => {
+  try {
+    const cart = await Cart.findOne({ userId: req.params.userId });
+    if (!cart) {
+      return res.json({ items: [], totalAmount: 0 });
+    }
+    res.json(cart);
+  } catch (err) {
+    console.error("GET CART COUNT ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
@@ -77,25 +88,19 @@ router.get("/:userId", async (req, res) => {
    POST /api/cart/increase
 ========================== */
 router.post("/increase", async (req, res) => {
-  try {
-    const { userId, name } = req.body;
+  const { userId, name } = req.body;
 
-    const cart = await Cart.findOne({ userId });
-    if (!cart) return res.status(404).json({ message: "Cart not found" });
+  const cart = await Cart.findOne({ userId });
+  if (!cart) return res.json({ success: true });
 
-    const item = cart.items.find(i => i.name === name);
-    if (!item) return res.status(404).json({ message: "Item not found" });
-
+  const item = cart.items.find(i => i.name === name);
+  if (item) {
     item.quantity += 1;
     cart.totalAmount += item.price;
-
     await cart.save();
-    res.json({ success: true, cart });
-
-  } catch (err) {
-    console.error("INCREASE ERROR:", err);
-    res.status(500).json({ message: "Server error" });
   }
+
+  res.json({ success: true });
 });
 
 /* ==========================
@@ -103,15 +108,13 @@ router.post("/increase", async (req, res) => {
    POST /api/cart/decrease
 ========================== */
 router.post("/decrease", async (req, res) => {
-  try {
-    const { userId, name } = req.body;
+  const { userId, name } = req.body;
 
-    const cart = await Cart.findOne({ userId });
-    if (!cart) return res.status(404).json({ message: "Cart not found" });
+  const cart = await Cart.findOne({ userId });
+  if (!cart) return res.json({ success: true });
 
-    const item = cart.items.find(i => i.name === name);
-    if (!item) return res.status(404).json({ message: "Item not found" });
-
+  const item = cart.items.find(i => i.name === name);
+  if (item) {
     item.quantity -= 1;
     cart.totalAmount -= item.price;
 
@@ -120,14 +123,10 @@ router.post("/decrease", async (req, res) => {
     }
 
     if (cart.totalAmount < 0) cart.totalAmount = 0;
-
     await cart.save();
-    res.json({ success: true, cart });
-
-  } catch (err) {
-    console.error("DECREASE ERROR:", err);
-    res.status(500).json({ message: "Server error" });
   }
+
+  res.json({ success: true });
 });
 
 /* ==========================
@@ -135,27 +134,21 @@ router.post("/decrease", async (req, res) => {
    POST /api/cart/remove-item
 ========================== */
 router.post("/remove-item", async (req, res) => {
-  try {
-    const { userId, name } = req.body;
+  const { userId, name } = req.body;
 
-    const cart = await Cart.findOne({ userId });
-    if (!cart) return res.status(404).json({ message: "Cart not found" });
+  const cart = await Cart.findOne({ userId });
+  if (!cart) return res.json({ success: true });
 
-    const item = cart.items.find(i => i.name === name);
-    if (!item) return res.status(404).json({ message: "Item not found" });
+  const item = cart.items.find(i => i.name === name);
+  if (!item) return res.json({ success: true });
 
-    cart.totalAmount -= item.price * item.quantity;
-    cart.items = cart.items.filter(i => i.name !== name);
+  cart.totalAmount -= item.price * item.quantity;
+  cart.items = cart.items.filter(i => i.name !== name);
 
-    if (cart.totalAmount < 0) cart.totalAmount = 0;
+  if (cart.totalAmount < 0) cart.totalAmount = 0;
+  await cart.save();
 
-    await cart.save();
-    res.json({ success: true, cart });
-
-  } catch (err) {
-    console.error("REMOVE ITEM ERROR:", err);
-    res.status(500).json({ message: "Server error" });
-  }
+  res.json({ success: true });
 });
 
 module.exports = router;

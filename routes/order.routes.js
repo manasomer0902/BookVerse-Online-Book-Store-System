@@ -1,5 +1,6 @@
 const express = require("express");
 const nodemailer = require("nodemailer");
+const path = require("path");
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 
@@ -17,19 +18,35 @@ const transporter = nodemailer.createTransport({
 });
 
 /* ==========================
-   CREATE ORDER (FROM CART)
-   POST /api/order/create
+   BOOK → PDF MAP (CASE-INSENSITIVE, SAFE)
+========================== */
+const BOOK_PDF_MAP = {
+  java: "Java-Programming-Simplified.pdf",
+  "data structures": "Data-Structures & Algorithms.pdf",
+  web: "Web-Programming-with-Html-Css-and-Javascript.pdf"
+};
+
+function getPdfForBook(bookName) {
+  if (!bookName) return null;
+
+  const name = bookName.toLowerCase();
+
+  for (const key in BOOK_PDF_MAP) {
+    if (name.includes(key)) {
+      return BOOK_PDF_MAP[key];
+    }
+  }
+  return null;
+}
+
+/* ==========================
+   CREATE ORDER
 ========================== */
 router.post("/create", async (req, res) => {
   try {
     const { userId, customerDetails, bookType } = req.body;
 
-    if (!userId || !customerDetails || !bookType) {
-      return res.status(400).json({ message: "Missing order details" });
-    }
-
     const cart = await Cart.findOne({ userId });
-
     if (!cart || cart.items.length === 0) {
       return res.status(400).json({ message: "Cart is empty" });
     }
@@ -47,11 +64,8 @@ router.post("/create", async (req, res) => {
 
     await order.save();
 
-    // ❗ DO NOT DELETE CART HERE (wait for payment success)
-
     res.json({
       success: true,
-      message: "Order created",
       orderId: order._id
     });
 
@@ -62,39 +76,27 @@ router.post("/create", async (req, res) => {
 });
 
 /* ==========================
-   GET LATEST ORDER (PAYMENT)
-   GET /api/order/latest/:userId
+   GET LATEST PENDING ORDER
 ========================== */
 router.get("/latest/:userId", async (req, res) => {
-  try {
-    const order = await Order.findOne({
-      userId: req.params.userId,
-      orderStatus: "Pending"
-    }).sort({ createdAt: -1 });
+  const order = await Order.findOne({
+    userId: req.params.userId,
+    orderStatus: "Pending"
+  }).sort({ createdAt: -1 });
 
-    if (!order) {
-      return res.status(404).json({ message: "No pending order found" });
-    }
-
-    res.json(order);
-
-  } catch (err) {
-    console.error("FETCH LATEST ORDER ERROR:", err);
-    res.status(500).json({ message: "Server error" });
+  if (!order) {
+    return res.status(404).json({ message: "No pending order found" });
   }
+
+  res.json(order);
 });
 
 /* ==========================
-   CONFIRM PAYMENT + EMAIL
-   POST /api/order/confirm-payment
+   CONFIRM PAYMENT + EMAIL + DOWNLOAD LINKS
 ========================== */
 router.post("/confirm-payment", async (req, res) => {
   try {
     const { orderId } = req.body;
-
-    if (!orderId) {
-      return res.status(400).json({ message: "Order ID required" });
-    }
 
     const order = await Order.findById(orderId);
     if (!order) {
@@ -105,15 +107,35 @@ router.post("/confirm-payment", async (req, res) => {
       return res.status(400).json({ message: "Payment already completed" });
     }
 
-    // ✅ Update order
     order.orderStatus = "Confirmed";
     order.paymentStatus = "Paid";
     await order.save();
 
-    // ✅ Clear cart AFTER payment success
+    // Clear cart AFTER successful payment
     await Cart.deleteOne({ userId: order.userId });
 
-    // ✅ Send email
+    /* ===== GENERATE SECURE DOWNLOAD LINKS ===== */
+    let downloadLinks = [];
+
+    if (order.bookType === "Soft Copy") {
+      order.items.forEach(item => {
+        const pdfFile = getPdfForBook(item.name);
+        if (pdfFile) {
+          downloadLinks.push(
+            `${process.env.BASE_URL}/secure-books/${encodeURIComponent(pdfFile)}`
+          );
+        }
+      });
+    }
+
+    // 🔥 FAST RESPONSE (do not wait for email)
+    res.json({ success: true });
+
+    /* ===== SEND EMAIL AFTER RESPONSE ===== */
+    const linksHtml = downloadLinks.length
+      ? `<ul>${downloadLinks.map(l => `<li><a href="${l}">${l}</a></li>`).join("")}</ul>`
+      : "";
+
     await transporter.sendMail({
       from: `BookVerse <${process.env.EMAIL_USER}>`,
       to: order.customerDetails.email,
@@ -121,45 +143,30 @@ router.post("/confirm-payment", async (req, res) => {
       html: `
         <h3>Order Confirmed</h3>
         <p>Hello ${order.customerDetails.name},</p>
-        <p>Your order has been successfully confirmed.</p>
+
+        <p>Your payment has been received successfully.</p>
+
         <p><strong>Total Amount:</strong> ₹${order.totalAmount}</p>
+        <p><strong>Order Type:</strong> ${order.bookType}</p>
+
+        ${
+          downloadLinks.length
+            ? `<p>Download your books below:</p>${linksHtml}`
+            : `<p>Your books will be delivered soon.</p>`
+        }
+
         <p>Thank you for shopping with BookVerse.</p>
       `
     });
 
-    // 📱 DEMO SMS
-    console.log(
-      `SMS to ${order.customerDetails.phone}: Order confirmed. Amount ₹${order.totalAmount}`
-    );
-
-    res.json({ success: true, message: "Payment confirmed" });
-
   } catch (err) {
-    console.error("CONFIRM PAYMENT ERROR:", err);
+    console.error("PAYMENT ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
 /* ==========================
-   MY ORDERS
-   GET /api/order/my-orders/:userId
-========================== */
-router.get("/my-orders/:userId", async (req, res) => {
-  try {
-    const orders = await Order.find({ userId: req.params.userId })
-      .sort({ createdAt: -1 });
-
-    res.json(orders);
-
-  } catch (err) {
-    console.error("FETCH ORDERS ERROR:", err);
-    res.status(500).json({ message: "Failed to load orders" });
-  }
-});
-
-/* ==========================
-   CANCEL ORDER (DEMO REFUND)
-   POST /api/order/cancel
+   CANCEL ORDER + EMAIL
 ========================== */
 router.post("/cancel", async (req, res) => {
   try {
@@ -180,10 +187,24 @@ router.post("/cancel", async (req, res) => {
     order.refundStatus = "Initiated";
     await order.save();
 
-    res.json({
-      success: true,
-      message: "Order cancelled. Refund initiated (Demo)."
+    await transporter.sendMail({
+      from: `BookVerse <${process.env.EMAIL_USER}>`,
+      to: order.customerDetails.email,
+      subject: "Order Cancelled & Refund Initiated - BookVerse",
+      html: `
+        <h3>Order Cancelled</h3>
+        <p>Hello ${order.customerDetails.name},</p>
+
+        <p>Your order has been cancelled successfully.</p>
+
+        <p><strong>Refund Status:</strong> Initiated</p>
+        <p><strong>Amount:</strong> ₹${order.totalAmount}</p>
+
+        <p>Refund will be processed shortly.</p>
+      `
     });
+
+    res.json({ success: true });
 
   } catch (err) {
     console.error("CANCEL ORDER ERROR:", err);

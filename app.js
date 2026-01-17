@@ -8,6 +8,8 @@ const path = require("path");
 const authRoutes = require("./routes/auth.routes");
 const cartRoutes = require("./routes/cart.routes");
 const orderRoutes = require("./routes/order.routes");
+const contactRoutes = require("./routes/contact.routes");
+const reviewRoutes = require("./routes/review.routes");
 
 // ===== APP INIT =====
 const app = express();
@@ -25,14 +27,12 @@ app.use("/secure-books", express.static(path.join(__dirname, "public/books")));
 app.use("/api/auth", authRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/order", orderRoutes);
+app.use("/api/contact", require("./routes/contact.routes"));
+app.use("/api/review", require("./routes/review.routes"));
 
 // ===== PAGE ROUTES =====
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "index.html"));
-});
-
-app.get("/about", (req, res) => {
-  res.sendFile(path.join(__dirname, "views/about.html"));
 });
 
 app.get("/signup", (req, res) => {

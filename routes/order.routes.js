@@ -6,9 +6,7 @@ const Cart = require("../models/Cart");
 
 const router = express.Router();
 
-/* ==========================
-   EMAIL CONFIG
-========================== */
+/* ================= EMAIL CONFIG ================= */
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -17,18 +15,21 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-/* ==========================
-   BOOK → PDF MAP (CASE-INSENSITIVE, SAFE)
-========================== */
+/* ================= BOOK → PDF MAP (MATCHES FOLDER) ================= */
 const BOOK_PDF_MAP = {
-  java: "Java-Programming-Simplified.pdf",
+  "java": "Java-Programming-Simplified.pdf",
   "data structures": "Data-Structures & Algorithms.pdf",
-  web: "Web-Programming-with-Html-Css-and-Javascript.pdf"
+  "dbms": "DBMS Concepts.pdf",
+  "python": "Python Crash Course.pdf",
+  "clean": "Clean Code.pdf",
+  "network": "Computer Networks.pdf",
+  "operating": "Operating Systems.pdf",
+  "web": "Web Programming with Html Css and Javascript.pdf"
 };
+
 
 function getPdfForBook(bookName) {
   if (!bookName) return null;
-
   const name = bookName.toLowerCase();
 
   for (const key in BOOK_PDF_MAP) {
@@ -39,9 +40,7 @@ function getPdfForBook(bookName) {
   return null;
 }
 
-/* ==========================
-   CREATE ORDER
-========================== */
+/* ================= CREATE ORDER ================= */
 router.post("/create", async (req, res) => {
   try {
     const { userId, customerDetails, bookType } = req.body;
@@ -63,11 +62,7 @@ router.post("/create", async (req, res) => {
     });
 
     await order.save();
-
-    res.json({
-      success: true,
-      orderId: order._id
-    });
+    res.json({ success: true, orderId: order._id });
 
   } catch (err) {
     console.error("CREATE ORDER ERROR:", err);
@@ -75,9 +70,7 @@ router.post("/create", async (req, res) => {
   }
 });
 
-/* ==========================
-   GET LATEST PENDING ORDER
-========================== */
+/* ================= LATEST PENDING ORDER ================= */
 router.get("/latest/:userId", async (req, res) => {
   const order = await Order.findOne({
     userId: req.params.userId,
@@ -91,50 +84,44 @@ router.get("/latest/:userId", async (req, res) => {
   res.json(order);
 });
 
-/* ==========================
-   CONFIRM PAYMENT + EMAIL + DOWNLOAD LINKS
-========================== */
+/* ================= CONFIRM PAYMENT ================= */
 router.post("/confirm-payment", async (req, res) => {
   try {
     const { orderId } = req.body;
 
     const order = await Order.findById(orderId);
-    if (!order) {
-      return res.status(404).json({ message: "Order not found" });
-    }
+    if (!order) return res.status(404).json({ message: "Order not found" });
 
     if (order.paymentStatus === "Paid") {
       return res.status(400).json({ message: "Payment already completed" });
     }
 
+    // ✅ Update order
     order.orderStatus = "Confirmed";
     order.paymentStatus = "Paid";
     await order.save();
 
-    // Clear cart AFTER successful payment
+    // ✅ Clear cart
     await Cart.deleteOne({ userId: order.userId });
 
-    /* ===== GENERATE SECURE DOWNLOAD LINKS ===== */
-    let downloadLinks = [];
+    // ⚡ FAST RESPONSE (UI does not wait for email)
+    res.json({ success: true });
+
+    /* ================= EMAIL WITH ALL PDFs ================= */
+    let attachments = [];
 
     if (order.bookType === "Soft Copy") {
       order.items.forEach(item => {
         const pdfFile = getPdfForBook(item.name);
+
         if (pdfFile) {
-          downloadLinks.push(
-            `${process.env.BASE_URL}/secure-books/${encodeURIComponent(pdfFile)}`
-          );
+          attachments.push({
+            filename: pdfFile,
+            path: path.join(__dirname, "../public/books", pdfFile)
+          });
         }
       });
     }
-
-    // 🔥 FAST RESPONSE (do not wait for email)
-    res.json({ success: true });
-
-    /* ===== SEND EMAIL AFTER RESPONSE ===== */
-    const linksHtml = downloadLinks.length
-      ? `<ul>${downloadLinks.map(l => `<li><a href="${l}">${l}</a></li>`).join("")}</ul>`
-      : "";
 
     await transporter.sendMail({
       from: `BookVerse <${process.env.EMAIL_USER}>`,
@@ -150,24 +137,35 @@ router.post("/confirm-payment", async (req, res) => {
         <p><strong>Order Type:</strong> ${order.bookType}</p>
 
         ${
-          downloadLinks.length
-            ? `<p>Download your books below:</p>${linksHtml}`
-            : `<p>Your books will be delivered soon.</p>`
+          order.bookType === "Soft Copy"
+            ? "<p>Your purchased books are attached as PDF files.</p>"
+            : "<p>Your books will be delivered soon.</p>"
         }
 
         <p>Thank you for shopping with BookVerse.</p>
-      `
+      `,
+      attachments
     });
 
   } catch (err) {
-    console.error("PAYMENT ERROR:", err);
-    res.status(500).json({ message: "Server error" });
+    console.error("CONFIRM PAYMENT ERROR:", err);
   }
 });
 
-/* ==========================
-   CANCEL ORDER + EMAIL
-========================== */
+/* ================= MY ORDERS ================= */
+router.get("/my-orders/:userId", async (req, res) => {
+  try {
+    const orders = await Order.find({ userId: req.params.userId })
+      .sort({ createdAt: -1 });
+
+    res.json(orders);
+
+  } catch (err) {
+    res.status(500).json({ message: "Failed to load orders" });
+  }
+});
+
+/* ================= CANCEL ORDER (FIXED REFUND LOGIC) ================= */
 router.post("/cancel", async (req, res) => {
   try {
     const { orderId } = req.body;
@@ -184,27 +182,41 @@ router.post("/cancel", async (req, res) => {
     }
 
     order.orderStatus = "Cancelled";
-    order.refundStatus = "Initiated";
+
+    // ✅ Soft copy → No refund
+    if (order.bookType === "Soft Copy") {
+      order.refundStatus = "Not Applicable";
+    } else {
+      order.refundStatus = "Initiated";
+    }
+
     await order.save();
+
+    const refundText =
+      order.bookType === "Soft Copy"
+        ? "Refund is not applicable for soft copy orders."
+        : "Your refund has been initiated and will be processed shortly.";
 
     await transporter.sendMail({
       from: `BookVerse <${process.env.EMAIL_USER}>`,
       to: order.customerDetails.email,
-      subject: "Order Cancelled & Refund Initiated - BookVerse",
+      subject: "Order Cancelled - BookVerse",
       html: `
         <h3>Order Cancelled</h3>
         <p>Hello ${order.customerDetails.name},</p>
 
         <p>Your order has been cancelled successfully.</p>
-
-        <p><strong>Refund Status:</strong> Initiated</p>
+        <p><strong>${refundText}</strong></p>
         <p><strong>Amount:</strong> ₹${order.totalAmount}</p>
 
-        <p>Refund will be processed shortly.</p>
+        <p>Regards,<br>BookVerse Team</p>
       `
     });
 
-    res.json({ success: true });
+    res.json({
+      success: true,
+      message: "Order cancelled successfully"
+    });
 
   } catch (err) {
     console.error("CANCEL ORDER ERROR:", err);

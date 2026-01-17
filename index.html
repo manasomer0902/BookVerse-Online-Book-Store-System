@@ -19,7 +19,7 @@
 
   <nav>
     <a href="/" class="active">Home</a>
-    <a href="/about">About</a>
+    <a href="#footer">About</a>
     <a href="/books">View Books</a>
     <a href="/contact">Contact</a>
     <a href="/reviews">Feedback</a>
@@ -40,6 +40,52 @@
   <a href="/books" class="btn-primary">Browse Books</a>
 </section>
 
+<!-- ================= BOOK TYPES INFO ================= -->
+<section class="books-section" style="padding-top:30px">
+  <h2>Choose Your Book Type</h2>
+
+  <div style="
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+    gap:20px;
+    margin-top:25px;
+  ">
+
+    <!-- HARD COPY -->
+    <div style="
+      background:#ffffff;
+      padding:20px;
+      border-radius:12px;
+      box-shadow:0 8px 20px rgba(0,0,0,0.08)
+    ">
+      <h3 style="margin-bottom:10px">📦 Hard Copy</h3>
+      <ul style="font-size:14px; color:#555; padding-left:18px; line-height:1.7">
+        <li>Printed physical book</li>
+        <li>Home delivery available</li>
+        <li>Delivery time: 5–7 days</li>
+        <li>Refund available if cancelled</li>
+      </ul>
+    </div>
+
+    <!-- SOFT COPY -->
+    <div style="
+      background:#ffffff;
+      padding:20px;
+      border-radius:12px;
+      box-shadow:0 8px 20px rgba(0,0,0,0.08)
+    ">
+      <h3 style="margin-bottom:10px">📘 Soft Copy (PDF)</h3>
+      <ul style="font-size:14px; color:#555; padding-left:18px; line-height:1.7">
+        <li>Instant PDF on email</li>
+        <li>No delivery required</li>
+        <li>Works on mobile & laptop</li>
+        <li>No refund after payment</li>
+      </ul>
+    </div>
+
+  </div>
+</section>
+
 <section class="books-section">
   <h2>Featured Books</h2>
 
@@ -47,6 +93,7 @@
     <div class="book-card">
       <img src="/images/book1.jpg">
       <h3>Java Programming Simplified</h3>
+      <p class="author">Dr.Muneer Ahmad Dar</p>
       <p class="price">₹499</p>
       <button onclick="addToCart('Java-Programming-Simplified', 499, '/images/book1.jpg')">Add to Cart</button>
     </div>
@@ -54,6 +101,7 @@
     <div class="book-card">
       <img src="/images/book2.jpg">
       <h3>Data Structures & Algorithms</h3>
+      <p class="author">Bal Krishna Nyaupane</p>
       <p class="price">₹599</p>
       <button onclick="addToCart('Data-Structures & Algorithms', 599, '/images/book2.jpg')">Add to Cart</button>
     </div>
@@ -61,92 +109,77 @@
     <div class="book-card">
       <img src="/images/book3.jpg">
       <h3>Web Proramming with HTML, CSS and JavaScript</h3>
+      <p class="author">John Dean</p>  
       <p class="price">₹699</p>
       <button onclick="addToCart('Web Programming with Html Css and Javascript', 699, '/images/book3.jpg')">Add to Cart</button>
     </div>
+
+    <div class="book-card">
+      <img src="/images/book4.jpg">
+      <h3>Python Crash Course</h3>
+      <p class="author">Eric Matthes</p>
+      <p class="price">₹799</p>
+      <button onclick="addToCart('Python Crash Course', 799, '/images/book4.jpg')">Add to Cart</button>
   </div>
 </section>
 
-<footer class="footer">
-  <p>© 2026 BookVerse – All Rights Reserved.</p>
+<footer id="footer" class="site-footer">
+
+  <!-- TOP FOOTER (ABOUT + LINKS) -->
+  <div class="footer-top">
+
+    <!-- LEFT: ABOUT -->
+    <div class="footer-about">
+      <h2>About BookVerse</h2>
+      <p>
+        BookVerse is an online computer book store designed for students,
+        developers, and professionals. We provide high-quality academic
+        and technical books in both <strong>Hard Copy</strong> and
+        <strong>Soft Copy (PDF)</strong> formats.
+      </p>
+      <p>
+        Our goal is to make learning affordable, fast, and accessible
+        from anywhere.
+      </p>
+    </div>
+
+    <!-- RIGHT: LINKS -->
+    <div class="footer-links">
+      <h4>Helpful Links</h4>
+      <ul>
+        <li><a href="/privacy">Privacy Policy</a></li>
+        <li><a href="/terms">Terms & Conditions</a></li>
+        <li><a href="/refund">Cancellation Policy</a></li>
+        <li><a href="#footer">About Us</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM FOOTER -->
+  <div class="footer-bottom">
+    <div class="footer-brand">
+      <h3>BookVerse</h3>
+      <p>
+        One of the most trusted online computer book platforms.
+        Learn, grow, and build your future with quality resources.
+      </p>
+    </div>
+
+    <div class="footer-contact">
+      <h4>Get in Touch</h4>
+      <p>Email:</p>
+      <a href="mailto:bookverse@gmail.com">bookverse@gmail.com</a>
+    </div>
+  </div>
+
+  <div class="footer-copy">
+    © 2026 BookVerse | All Rights Reserved
+  </div>
+
 </footer>
 
-<script>
-const authArea = document.getElementById("authArea");
-const myOrdersLink = document.getElementById("myOrdersLink");
-const cartCountEl = document.getElementById("cartCount");
-
-const isLoggedIn = localStorage.getItem("isLoggedIn");
-const userName = localStorage.getItem("userName");
-
-if (isLoggedIn === "true") {
-  authArea.innerHTML = `
-    <span class="user-name">👤 ${userName || "User"}</span>
-    <a href="#" class="btn login-btn" onclick="logout()">Logout</a>
-  `;
-  myOrdersLink.innerHTML = `<a href="/my-orders">My Orders</a>`;
-} else {
-  authArea.innerHTML = `
-    <a href="/login" class="btn login-btn">Login</a>
-    <a href="/signup" class="btn signup-btn">Sign Up</a>
-  `;
-}
-
-function logout() {
-  localStorage.clear();
-  window.location.href = "/";
-}
-
-function openCart() {
-  if (localStorage.getItem("isLoggedIn") === "true") {
-    window.location.href = "/cart";
-  } else {
-    alert("Please login first");
-    window.location.href = "/login";
-  }
-}
-
-// ✅ FIXED ENDPOINT
-async function loadCartCount() {
-  const userId = localStorage.getItem("userId");
-  if (!userId) return;
-
-  try {
-    const res = await fetch(`/api/cart/${userId}`);
-    const data = await res.json();
-
-    let count = 0;
-    if (data.items) {
-      data.items.forEach(i => count += i.quantity);
-    }
-
-    cartCountEl.innerText = count;
-  } catch {
-    cartCountEl.innerText = 0;
-  }
-}
-
-loadCartCount();
-
-async function addToCart(name, price, image) {
-  const userId = localStorage.getItem("userId");
-
-  if (!userId) {
-    alert("Please login first");
-    window.location.href = "/login";
-    return;
-  }
-
-  await fetch("/api/cart/add-to-cart", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ userId, name, price, image })
-  });
-
-  loadCartCount(); // 🔥 instant update
-  alert("Book added to cart");
-}
-</script>
+<script src="/js/common.js"></script>
 
 </body>
 </html>

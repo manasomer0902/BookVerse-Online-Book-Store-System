@@ -6,6 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
 </head>
 <body>
 
@@ -16,14 +17,23 @@
     <span>BookVerse | Online Computer Book Store</span>
   </a>
 
-  <nav>
-    <a href="/">Home</a>
-    <a href="/books">View Books</a>
-    <a href="/contact">Contact</a>
+<nav>
+  <a href="/">Home</a>
+  <a href="#footer">About</a>
+  <a href="/books">View Books</a>
+  <a href="/contact">Contact</a>
+  <a href="/reviews">Feedback</a>
 
-    <a href="/cart" class="cart-icon">🛒</a>
-    <span id="authArea"></span>
-  </nav>
+
+  <span id="myOrdersLink"></span>
+
+  <a href="#" class="cart-icon" onclick="openCart()">
+    🛒 <span id="cartCount" class="cart-badge">0</span>
+  </a>
+
+  <span id="authArea"></span>
+</nav>
+
 </header>
 
 <!-- ORDERS -->
@@ -34,9 +44,61 @@
   </div>
 </section>
 
-<!-- FOOTER -->
-<footer class="footer">
-  <p>© 2026 BookVerse – Online Computer Book Store. All Rights Reserved.</p>
+<!-- ================= FOOTER ================= -->
+<footer id="footer" class="site-footer">
+
+  <!-- TOP FOOTER (ABOUT + LINKS) -->
+  <div class="footer-top">
+
+    <!-- LEFT: ABOUT -->
+    <div class="footer-about">
+      <h2>About BookVerse</h2>
+      <p>
+        BookVerse is an online computer book store designed for students,
+        developers, and professionals. We provide high-quality academic
+        and technical books in both <strong>Hard Copy</strong> and
+        <strong>Soft Copy (PDF)</strong> formats.
+      </p>
+      <p>
+        Our goal is to make learning affordable, fast, and accessible
+        from anywhere.
+      </p>
+    </div>
+
+    <!-- RIGHT: LINKS -->
+    <div class="footer-links">
+      <h4>Helpful Links</h4>
+      <ul>
+        <li><a href="/privacy">Privacy Policy</a></li>
+        <li><a href="/terms">Terms & Conditions</a></li>
+        <li><a href="/refund">Cancellation Policy</a></li>
+        <li><a href="#footer">About Us</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM FOOTER -->
+  <div class="footer-bottom">
+    <div class="footer-brand">
+      <h3>BookVerse</h3>
+      <p>
+        One of the most trusted online computer book platforms.
+        Learn, grow, and build your future with quality resources.
+      </p>
+    </div>
+
+    <div class="footer-contact">
+      <h4>Get in Touch</h4>
+      <p>Email:</p>
+      <a href="mailto:bookverse@gmail.com">bookverse@gmail.com</a>
+    </div>
+  </div>
+
+  <div class="footer-copy">
+    © 2026 BookVerse | All Rights Reserved
+  </div>
+
 </footer>
 
 <script>
@@ -47,54 +109,77 @@ if (!userId) {
   window.location.href = "/login";
 }
 
+/* ================= LOAD ORDERS ================= */
 async function loadOrders() {
-  const res = await fetch(`/api/order/my-orders/${userId}`);
-  const orders = await res.json();
+  try {
+    const res = await fetch(`/api/order/my-orders/${userId}`);
+    const orders = await res.json();
 
-  const div = document.getElementById("orders");
-  div.innerHTML = "";
+    const ordersDiv = document.getElementById("orders");
+    ordersDiv.innerHTML = "";
 
-  if (!orders || orders.length === 0) {
-    div.innerHTML = "<p>No orders found yet.</p>";
-    return;
-  }
-
-  orders.forEach(order => {
-    let statusColor =
-      order.orderStatus === "Confirmed" ? "green" :
-      order.orderStatus === "Pending" ? "orange" : "red";
-
-    let cancelBtn = "";
-
-    if (order.orderStatus === "Confirmed") {
-      cancelBtn = `
-        <button class="btn-primary" onclick="cancelOrder('${order._id}')">
-          Cancel Order
-        </button>
-      `;
+    if (!orders || orders.length === 0) {
+      ordersDiv.innerHTML = "<p>No orders found yet.</p>";
+      return;
     }
 
-    div.innerHTML += `
-      <div class="order-card" style="margin-bottom:15px">
-        <p><strong>Order ID:</strong> ${order._id}</p>
-        <p><strong>Total:</strong> ₹${order.totalAmount}</p>
-        <p>
-          <strong>Status:</strong>
-          <span style="color:${statusColor}">
-            ${order.orderStatus}
-          </span>
-        </p>
-        <p><strong>Refund:</strong> ${order.refundStatus}</p>
-        ${cancelBtn}
-      </div>
-    `;
-  });
+    orders.forEach(order => {
+      const statusColor =
+        order.orderStatus === "Confirmed" ? "green" :
+        order.orderStatus === "Pending" ? "orange" : "red";
+
+      let cancelBtn = "";
+
+      if (order.orderStatus === "Confirmed") {
+        cancelBtn = `
+          <button class="btn-primary" style="margin-top:10px"
+            onclick="cancelOrder('${order._id}')">
+            Cancel Order
+          </button>
+        `;
+      }
+
+      ordersDiv.innerHTML += `
+        <div class="order-card" style="margin-bottom:15px">
+          <p><strong>Order ID:</strong> ${order._id}</p>
+          <p><strong>Total:</strong> ₹${order.totalAmount}</p>
+          <p><strong>Type:</strong> ${order.bookType}</p>
+          <p>
+            <strong>Status:</strong>
+            <span style="color:${statusColor}">
+              ${order.orderStatus}
+            </span>
+          </p>
+          <p><strong>Refund:</strong> ${order.refundStatus}</p>
+          ${cancelBtn}
+        </div>
+      `;
+    });
+
+  } catch (err) {
+    document.getElementById("orders").innerHTML =
+      "<p>Failed to load orders. Please try again.</p>";
+  }
 }
 
+/* ================= CANCEL ORDER ================= */
+async function cancelOrder(orderId) {
+  if (!confirm("Are you sure you want to cancel this order?")) return;
+
+  const res = await fetch("/api/order/cancel", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ orderId })
+  });
+
+  const data = await res.json();
+  alert(data.message || "Order cancelled");
+  loadOrders();
+}
 loadOrders();
 </script>
 
-
+<script src="/js/common.js"></script>
 
 </body>
 </html>

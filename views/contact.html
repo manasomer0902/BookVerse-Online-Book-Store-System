@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Contact Us | BookVerse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<header class="navbar">
+  <a href="/" class="logo">
+    <img src="/images/logo.png" alt="BookVerse Logo">
+    <span>BookVerse | Online Computer Book Store</span>
+  </a>
+
+  <nav>
+    <a href="/">Home</a>
+    <a href="#footer">About</a>
+    <a href="/books">View Books</a>
+    <a href="/contact" class="active">Contact</a>
+    <a href="/reviews">Feedback</a>
+
+
+    <span id="myOrdersLink"></span>
+
+    <a href="#" class="cart-icon" onclick="openCart()">
+      🛒 <span id="cartCount" class="cart-badge">0</span>
+    </a>
+
+    <span id="authArea"></span>
+  </nav>
+</header>
+
+<!-- ================= CONTACT SECTION ================= -->
+<section class="order-section">
+  <div class="order-card">
+    <h2>Contact Us</h2>
+    <p class="order-subtitle">
+      Have a question? Need a book? We’re here to help.
+    </p>
+
+    <form onsubmit="submitContact(event)">
+
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="name" required placeholder="Enter your name">
+      </div>
+
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input
+          type="tel"
+          id="phone"
+          required
+          placeholder="Enter your phone number"
+        >
+      </div>    
+
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="email" required placeholder="Enter your email">
+      </div>
+
+      <div class="form-group">
+        <label>Book Name (optional)</label>
+        <input type="text" id="bookName" placeholder="Which book are you looking for?">
+      </div>
+
+      <div class="form-group">
+        <label>Your Message</label>
+        <textarea
+          id="message"
+          rows="5"
+          required
+          placeholder="Write your query here..."
+          style="width:100%; padding:12px; border-radius:6px; border:1px solid #cbd5e1;"
+        ></textarea>
+      </div>
+
+      <button type="submit" class="btn-primary full-btn">
+        Send Message
+      </button>
+    </form>
+
+    <!-- CONTACT INFO -->
+    <div style="margin-top:30px; color:#475569; line-height:1.7;">
+      <p><strong>Email:</strong> bookverse@gmail.com</p>
+      <p><strong>Support:</strong> Available Monday – Saturday</p>
+      <p><strong>Response Time:</strong> Within 24 hours</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer id="footer" class="site-footer">
+
+  <div class="footer-top">
+
+    <div class="footer-about">
+      <h2>About BookVerse</h2>
+      <p>
+        BookVerse is an online computer book store designed for students,
+        developers, and professionals. We provide high-quality academic
+        and technical books in both <strong>Hard Copy</strong> and
+        <strong>Soft Copy (PDF)</strong> formats.
+      </p>
+      <p>
+        Our goal is to make learning affordable, fast, and accessible
+        from anywhere.
+      </p>
+    </div>
+
+    <div class="footer-links">
+      <h4>Helpful Links</h4>
+      <ul>
+        <li><a href="/privacy">Privacy Policy</a></li>
+        <li><a href="/terms">Terms & Conditions</a></li>
+        <li><a href="/refund">Cancellation Policy</a></li>
+        <li><a href="#footer">About Us</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="footer-bottom">
+    <div class="footer-brand">
+      <h3>BookVerse</h3>
+      <p>
+        One of the most trusted online computer book platforms.
+        Learn, grow, and build your future with quality resources.
+      </p>
+    </div>
+
+    <div class="footer-contact">
+      <h4>Get in Touch</h4>
+      <p>Email:</p>
+      <a href="mailto:bookverse@gmail.com">bookverse@gmail.com</a>
+    </div>
+  </div>
+
+  <div class="footer-copy">
+    © 2026 BookVerse | All Rights Reserved
+  </div>
+
+</footer>
+
+<!-- ================= SCRIPTS ================= -->
+<script>
+async function submitContact(e) {
+  e.preventDefault();
+
+  const data = {
+    name: document.getElementById("name").value,
+    email: document.getElementById("email").value,
+    phone: document.getElementById("phone").value,
+    bookName: document.getElementById("bookName").value,
+    message: document.getElementById("message").value
+  };
+
+  const res = await fetch("/api/contact", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  if (res.ok) {
+    alert("Message sent successfully!");
+    e.target.reset();
+  } else {
+    alert("Failed to send message");
+  }
+}
+</script>
+
+<script src="/js/common.js"></script>
+
+</body>
+</html>

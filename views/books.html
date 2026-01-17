@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Books | BookVerse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" type="image/x-icon" href="/images/favicon.ico">  
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<header class="navbar">
+  <a href="/" class="logo">
+    <img src="/images/logo.png" alt="BookVerse Logo">
+    <span>BookVerse | Online Computer Book Store</span>
+  </a>
+
+  <nav>
+    <a href="/">Home</a>
+    <a href="#footer">About</a>
+    <a href="/books" class="active">View Books</a>
+    <a href="/contact">Contact</a>
+    <a href="/reviews">Feedback</a>
+
+    <span id="myOrdersLink"></span>
+
+    <a href="#" class="cart-icon" onclick="openCart()">
+      🛒 <span id="cartCount" class="cart-badge">0</span>
+    </a>
+
+    <span id="authArea"></span>
+  </nav>
+</header>
+
+<!-- ================= BOOKS ================= -->
+<section class="books-section">
+  <h2>Available Books</h2>
+
+  <!-- 🔍 SEARCH BAR -->
+  <div class="search-box">
+    <input
+      type="text"
+      id="bookSearch"
+      placeholder="Search by book name or author..."
+      onkeyup="filterBooks()"
+    >
+  </div>
+
+  <div class="book-grid">
+
+    <!-- ✅ SAME AS HOME PAGE -->
+    <div class="book-card">
+      <img src="/images/book1.jpg">
+      <h3>Java Programming Simplified</h3>
+      <p class="author">Dr.Muneer Ahmad Dar</p>
+      <p class="price">₹499</p>
+      <button onclick="addToCart('Java Programming Simplified', 499, '/images/book1.jpg')">
+        Add to Cart
+      </button>
+    </div>
+
+    <div class="book-card">
+      <img src="/images/book2.jpg">
+      <h3>Data Structures & Algorithms</h3>
+      <p class="author">Bal Krishna Nyaupane</p>
+      <p class="price">₹599</p>
+      <button onclick="addToCart('Data Structures & Algorithms', 599, '/images/book2.jpg')">
+        Add to Cart
+      </button>
+    </div>
+
+    <div class="book-card">
+      <img src="/images/book3.jpg">
+      <h3>Web Programming with HTML, CSS and JavaScript</h3>
+      <p class="author">John Dean</p>
+      <p class="price">₹699</p>
+      <button onclick="addToCart('Web Programming with HTML, CSS and JavaScript', 699, '/images/book3.jpg')">
+        Add to Cart
+      </button>
+    </div>
+
+    <!-- ================= MORE BOOKS ================= -->
+
+    <div class="book-card">
+      <img src="/images/book4.jpg">
+      <h3>Python Crash Course</h3>
+      <p class="author">By Eric Matthes</p>
+      <p class="price">₹549</p>
+      <button onclick="addToCart('Python Crash Course', 549, '/images/book4.jpg')">
+        Add to Cart
+      </button>
+    </div>
+
+    <div class="book-card">
+      <img src="/images/book5.jpg">
+      <h3>Clean Code</h3>
+      <p class="author">By Robert C. Martin</p>
+      <p class="price">₹799</p>
+      <button onclick="addToCart('Clean Code', 799, '/images/book5.jpg')">
+        Add to Cart
+      </button>
+    </div>
+
+    <div class="book-card">
+      <img src="/images/book6.jpg">
+      <h3>Operating Systems</h3>
+      <p class="author">By Silberschatz</p>
+      <p class="price">₹749</p>
+      <button onclick="addToCart('Operating Systems', 749, '/images/book6.jpg')">
+        Add to Cart
+      </button>
+    </div>
+
+    <div class="book-card">
+      <img src="/images/book7.jpg">
+      <h3>Computer Networks</h3>
+      <p class="author">By Andrew S. Tanenbaum</p>
+      <p class="price">₹699</p>
+      <button onclick="addToCart('Computer Networks', 699, '/images/book7.jpg')">
+        Add to Cart
+      </button>
+    </div>
+
+    <div class="book-card">
+      <img src="/images/book8.jpg">
+      <h3>DBMS Concepts</h3>
+      <p class="author">By Henry F. Korth</p>
+      <p class="price">₹649</p>
+      <button onclick="addToCart('DBMS Concepts', 649, '/images/book8.jpg')">
+        Add to Cart
+      </button>
+    </div>
+    
+  </div>
+</section>
+
+<footer id="footer" class="site-footer">
+
+  <!-- TOP FOOTER (ABOUT + LINKS) -->
+  <div class="footer-top">
+
+    <!-- LEFT: ABOUT -->
+    <div class="footer-about">
+      <h2>About BookVerse</h2>
+      <p>
+        BookVerse is an online computer book store designed for students,
+        developers, and professionals. We provide high-quality academic
+        and technical books in both <strong>Hard Copy</strong> and
+        <strong>Soft Copy (PDF)</strong> formats.
+      </p>
+      <p>
+        Our goal is to make learning affordable, fast, and accessible
+        from anywhere.
+      </p>
+    </div>
+
+    <!-- RIGHT: LINKS -->
+    <div class="footer-links">
+      <h4>Helpful Links</h4>
+      <ul>
+        <li><a href="/privacy">Privacy Policy</a></li>
+        <li><a href="/terms">Terms & Conditions</a></li>
+        <li><a href="/refund">Cancellation Policy</a></li>
+        <li><a href="#footer">About Us</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM FOOTER -->
+  <div class="footer-bottom">
+    <div class="footer-brand">
+      <h3>BookVerse</h3>
+      <p>
+        One of the most trusted online computer book platforms.
+        Learn, grow, and build your future with quality resources.
+      </p>
+    </div>
+
+    <div class="footer-contact">
+      <h4>Get in Touch</h4>
+      <p>Email:</p>
+      <a href="mailto:bookverse@gmail.com">bookverse@gmail.com</a>
+    </div>
+  </div>
+
+  <div class="footer-copy">
+    © 2026 BookVerse | All Rights Reserved
+  </div>
+
+</footer>
+
+<script src="/js/common.js"></script>
+
+<script>
+function filterBooks() {
+  const searchValue = document
+    .getElementById("bookSearch")
+    .value
+    .toLowerCase();
+
+  const books = document.querySelectorAll(".book-card");
+
+  books.forEach(book => {
+    const title = book.querySelector("h3").innerText.toLowerCase();
+    const author = book.querySelector(".author").innerText.toLowerCase();
+
+    if (title.includes(searchValue) || author.includes(searchValue)) {
+      book.style.display = "block";
+    } else {
+      book.style.display = "none";
+    }
+  });
+}
+</script>
+
+</body>
+</html>

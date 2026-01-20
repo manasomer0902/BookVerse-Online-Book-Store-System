@@ -5,113 +5,101 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login | BookVerse</title>
 
-  <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-
-  <!-- Main CSS -->
   <link rel="stylesheet" href="/css/styles.css">
-
-  <!-- Favicon -->
   <link rel="icon" href="/images/favicon.ico">
 </head>
 <body>
 
-  <!-- Navbar -->
-  <header class="navbar">
-    <a href="/" class="logo">
-      <img src="/images/logo.png" alt="BookVerse Logo">
-      <span>BookVerse</span>
-    </a>
+<header class="navbar">
+  <a href="/" class="logo">
+    <img src="/images/logo.png" alt="BookVerse Logo">
+    <span>BookVerse</span>
+  </a>
 
-    <nav>
-      <a href="/">Home</a>
-      <a href="/about">About</a>
-      <a href="/books">View Books</a>
-      <a href="/contact">Contact</a>
-      <a href="/reviews">Feedback</a>
+  <nav>
+    <a href="/">Home</a>
+    <a href="/books">View Books</a>
+    <a href="/contact">Contact</a>
+    <a href="/reviews">Feedback</a>
 
-      <a href="/login" class="btn login-btn active">Login</a>
-      <a href="/signup" class="btn signup-btn">Sign Up</a>
-    </nav>
-  </header>
+    <a href="/login" class="btn login-btn active">Login</a>
+    <a href="/signup" class="btn signup-btn">Sign Up</a>
+  </nav>
+</header>
 
-  <!-- Login Section -->
-  <section class="auth-section">
-    <div class="auth-card">
-      <h2>Login to BookVerse</h2>
-      <p class="auth-subtitle">Access your account to continue shopping</p>
+<section class="auth-section">
+  <div class="auth-card">
+    <h2>Login to BookVerse</h2>
+    <p class="auth-subtitle">Access your account</p>
 
-      <form onsubmit="handleLogin(event)">
-  <div class="form-group">
-    <label>Email or Phone Number</label>
-    <input type="text" id="loginInput" placeholder="Enter email or phone" required>
-    <small class="error-text" id="loginError"></small>
-  </div>
+    <form onsubmit="handleLogin(event)">
 
-  <div class="form-group password-group">
-    <label>Password</label>
-    <input type="password" id="passwordInput" placeholder="Enter password" required>
-    <span class="toggle-password" onclick="togglePassword()">&#128065;</span>
-  </div>
-
-
-  <button type="submit" class="btn-primary auth-btn">Login</button>
-</form>
-
-
-      <div class="auth-links">
-        <a href="/forgot-password">Forgot Password?</a>
-        <p>
-          Don’t have an account?
-          <a href="/signup">Sign Up</a>
-        </p>
+      <div class="form-group">
+        <label>Email or Phone Number</label>
+        <input type="text" id="loginInput" required>
+        <small class="error-text" id="loginError"></small>
       </div>
+
+      <div class="form-group">
+        <label>Login As</label>
+        <select id="roleSelect" required>
+          <option value="student">Student</option>
+          <option value="seller">Seller</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+
+      <div class="form-group password-group">
+        <label>Password</label>
+        <input type="password" id="passwordInput" required>
+        <span class="toggle-password" onclick="togglePassword()">👁</span>
+      </div>
+
+      <button type="submit" class="btn-primary auth-btn">Login</button>
+    </form>
+
+    <div class="auth-links">
+      <a href="/forgot-password" class="forgot-link"> 
+        Forgot Password?
+      </a>
     </div>
-  </section>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <p>© 2026 BookVerse – Online Computer Book Store. All Rights Reserved.</p>
-  </footer>
+      <p style="margin-top:10px;">
+        Don’t have an account? 
+        <a href="/signup">Sign Up</a>
+      </p>
+    </div>
+  </div>
+</section>
 
-  <!-- JS -->
+<footer class="footer">
+  <p>© 2026 BookVerse – All Rights Reserved.</p>
+</footer>
 <script>
 async function handleLogin(event) {
   event.preventDefault();
 
-  const input = document.getElementById("loginInput").value.trim();
+  const emailOrPhone = document.getElementById("loginInput").value.trim();
   const password = document.getElementById("passwordInput").value;
+  const role = document.getElementById("roleSelect").value;
   const error = document.getElementById("loginError");
 
   error.textContent = "";
 
-  // Phone validation
-  if (/^\d+$/.test(input)) {
-    if (input.length !== 10) {
-      error.textContent = "Phone number must be exactly 10 digits.";
-      return;
-    }
-  } else {
-    if (!input.includes("@")) {
-      error.textContent = "@ is missing in email address.";
-      return;
-    }
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(input)) {
-      error.textContent = "Incorrect email format.";
-      return;
-    }
+  if (!emailOrPhone || !password || !role) {
+    error.textContent = "All fields are required";
+    return;
   }
 
   try {
     const response = await fetch("/api/auth/login", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        emailOrPhone: input,   // ✅ FIXED
-        password: password
+        emailOrPhone,
+        password,
+        role
       })
     });
 
@@ -122,25 +110,33 @@ async function handleLogin(event) {
       return;
     }
 
-    // ✅ LOGIN SUCCESS
+    // ✅ STORE SESSION
     localStorage.setItem("isLoggedIn", "true");
     localStorage.setItem("userId", result.user.id);
     localStorage.setItem("userName", result.user.name);
+    localStorage.setItem("userRole", result.user.role);
 
-    window.location.href = "/";
+    // ✅ ROLE BASED REDIRECT
+    if (result.user.role === "admin") {
+      window.location.href = "/admin";
+    } else if (result.user.role === "seller") {
+      window.location.href = "/seller";
+    } else {
+      window.location.href = "/";
+    }
 
   } catch (err) {
     error.textContent = "Server error. Please try again later.";
   }
 }
+</script>
 
+<script>
 function togglePassword() {
   const pwd = document.getElementById("passwordInput");
   pwd.type = pwd.type === "password" ? "text" : "password";
 }
 </script>
-
-
 
 
 </body>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard | BookVerse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" href="/images/favicon.ico">
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<header class="navbar">
+  <a href="/" class="logo">
+    <img src="/images/logo.png">
+    <span>BookVerse Admin</span>
+  </a>
+
+  <nav>
+    <a href="/admin" class="active">Dashboard</a>
+    <button class="btn logout-btn" onclick="logout()">Logout</button>
+  </nav>
+</header>
+
+<!-- ================= ADMIN PANEL ================= -->
+<section class="order-section">
+  <div class="order-card">
+
+    <h2>Admin Dashboard</h2>
+    <p class="order-subtitle">
+      Manage all customer orders
+    </p>
+
+    <div id="orders" style="margin-top:25px"></div>
+
+  </div>
+</section>
+
+<script>
+/* ================= AUTH GUARD ================= */
+const isLoggedIn = localStorage.getItem("isLoggedIn");
+const role = localStorage.getItem("userRole");
+
+if (!isLoggedIn || role !== "admin") {
+  alert("Access denied");
+  window.location.href = "/login";
+}
+
+/* ================= LOGOUT ================= */
+function logout() {
+  localStorage.clear();
+  window.location.href = "/login";
+}
+
+/* ================= LOAD ORDERS ================= */
+async function loadOrders() {
+  const res = await fetch("/api/admin/orders");
+  const orders = await res.json();
+
+  const div = document.getElementById("orders");
+  div.innerHTML = "";
+
+  if (!orders.length) {
+    div.innerHTML = "<p>No orders found.</p>";
+    return;
+  }
+
+  orders.forEach(order => {
+    div.innerHTML += `
+      <div style="
+        background:#f8fafc;
+        padding:15px;
+        border-radius:10px;
+        margin-bottom:15px;
+      ">
+        <p><strong>Order ID:</strong> ${order._id}</p>
+        <p><strong>Name:</strong> ${order.customerDetails?.name || "N/A"}</p>
+        <p><strong>Total:</strong> ₹${order.totalAmount}</p>
+        <p>
+          <strong>Status:</strong> 
+          <span id="status-${order._id}">
+            ${order.orderStatus}
+          </span>
+        </p>
+
+<select
+  onchange="updateOrderStatus('${order._id}', this.value)"
+  ${order.orderStatus === "Delivered" ? "disabled" : ""}
+>
+  <option value="">Change Status</option>
+  <option value="Confirmed" ${order.orderStatus === "Confirmed" ? "selected" : ""}>
+    Confirmed
+  </option>
+  <option value="Dispatched" ${order.orderStatus === "Dispatched" ? "selected" : ""}>
+    Dispatched
+  </option>
+  <option value="On The Way" ${order.orderStatus === "On The Way" ? "selected" : ""}>
+    On The Way
+  </option>
+  <option value="Delivered" ${order.orderStatus === "Delivered" ? "selected" : ""}>
+    Delivered
+  </option>
+</select>
+
+      </div>
+    `;
+  });
+}
+
+/* ================= UPDATE STATUS ================= */
+async function updateOrderStatus(orderId, status) {
+  if (!status) return;
+
+  try {
+    const res = await fetch(`/api/admin/order-status/${orderId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        status: status   // ✅ FIXED
+      })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "Failed to update order");
+      return;
+    }
+
+    document.getElementById(`status-${orderId}`).innerText = status;
+
+    alert("Order updated & email sent");
+
+  } catch (err) {
+    alert("Server error");
+  }
+}
+loadOrders();
+</script>
+
+</body>
+</html>

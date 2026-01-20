@@ -24,7 +24,9 @@ const BOOK_PDF_MAP = {
   "clean": "Clean Code.pdf",
   "network": "Computer Networks.pdf",
   "operating": "Operating Systems.pdf",
-  "web": "Web Programming with Html Css and Javascript.pdf"
+  "web": "Web Programming with Html Css and Javascript.pdf",
+  "c programming": "C Programming Language.pdf",
+  "Pro java": "Pro Java Programming"
 };
 
 
@@ -56,7 +58,7 @@ router.post("/create", async (req, res) => {
       items: cart.items,
       bookType,
       totalAmount: cart.totalAmount,
-      orderStatus: "Pending",
+      orderStatus: "Confirmed",
       paymentStatus: "Pending",
       refundStatus: "Not Applicable"
     });
@@ -74,7 +76,7 @@ router.post("/create", async (req, res) => {
 router.get("/latest/:userId", async (req, res) => {
   const order = await Order.findOne({
     userId: req.params.userId,
-    orderStatus: "Pending"
+    orderStatus: "Confirmed"
   }).sort({ createdAt: -1 });
 
   if (!order) {

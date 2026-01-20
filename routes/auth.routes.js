@@ -5,110 +5,75 @@ const User = require("../models/User");
 const router = express.Router();
 
 /* =====================
-   SIGNUP
+   SIGNUP (STUDENT ONLY)
 ===================== */
 router.post("/signup", async (req, res) => {
   try {
     const { name, emailOrPhone, password } = req.body;
 
     if (!name || !emailOrPhone || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required"
-      });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
-    let email = null;
-    let phone = null;
-
-    if (emailOrPhone.includes("@")) {
-      email = emailOrPhone.toLowerCase();
-    } else {
-      phone = emailOrPhone;
+    const existing = await User.findOne({ emailOrPhone });
+    if (existing) {
+      return res.status(409).json({ message: "User already exists" });
     }
 
-    const existingUser = await User.findOne({
-      $or: [{ email }, { phone }]
-    });
+    const hash = await bcrypt.hash(password, 10);
 
-    if (existingUser) {
-      return res.status(409).json({
-        success: false,
-        message: "User already exists"
-      });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = new User({
+    await User.create({
       name,
-      email,
-      phone,
-      password: hashedPassword
+      emailOrPhone,
+      password: hash,
+      role: "student"
     });
 
-    await user.save();
-
-    res.status(201).json({
-      success: true,
-      message: "Signup successful"
-    });
+    res.status(201).json({ message: "Signup successful" });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "Server error"
-    });
+    console.error("SIGNUP ERROR:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
 /* =====================
-   LOGIN
+   LOGIN (ROLE BASED)
 ===================== */
 router.post("/login", async (req, res) => {
   try {
-    const { emailOrPhone, password } = req.body;
+    const { emailOrPhone, password, role } = req.body;
 
-    let user;
-
-    if (emailOrPhone.includes("@")) {
-      user = await User.findOne({ email: emailOrPhone.toLowerCase() });
-    } else {
-      user = await User.findOne({ phone: emailOrPhone });
+    if (!emailOrPhone || !password || !role) {
+      return res.status(400).json({ message: "All fields are required" });
     }
 
+    const user = await User.findOne({ emailOrPhone: emailOrPhone.trim() });
     if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials"
-      });
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    if (user.role !== role) {
+      return res.status(403).json({ message: "Access denied for selected role" });
     }
 
     const match = await bcrypt.compare(password, user.password);
-
     if (!match) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid credentials"
-      });
+      return res.status(401).json({ message: "Invalid credentials" });
     }
 
     res.json({
-      success: true,
       message: "Login successful",
       user: {
         id: user._id,
-        name: user.name
+        name: user.name,
+        role: user.role
       }
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({
-      success: false,
-      message: "Server error"
-    });
+    console.error("LOGIN ERROR:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

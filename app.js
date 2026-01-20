@@ -10,7 +10,9 @@ const cartRoutes = require("./routes/cart.routes");
 const orderRoutes = require("./routes/order.routes");
 const contactRoutes = require("./routes/contact.routes");
 const reviewRoutes = require("./routes/review.routes");
-
+const adminRoutes = require("./routes/admin.routes");
+const sellerRoutes = require("./routes/seller.routes");
+const passwordRoutes = require("./routes/password.routes");
 // ===== APP INIT =====
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -29,6 +31,9 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/order", orderRoutes);
 app.use("/api/contact", require("./routes/contact.routes"));
 app.use("/api/review", require("./routes/review.routes"));
+app.use("/api/seller", require("./routes/seller.routes"));
+app.use("/api/admin", require("./routes/admin.routes"));
+app.use("/api/password", require("./routes/password.routes"));
 
 // ===== PAGE ROUTES =====
 app.get("/", (req, res) => {
@@ -99,6 +104,10 @@ app.get("/seller", (req, res) => {
   res.sendFile(path.join(__dirname, "views/seller.html"));
 });
 
+app.get("/admin", (req, res) => {
+  res.sendFile(path.join(__dirname, "views/admin.html"));
+});
+
 // ===== 404 HANDLER =====
 app.use((req, res) => {
   res.status(404).send("404 - Page Not Found");
@@ -114,3 +123,4 @@ mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ MongoDB Connected"))
   .catch(err => console.error("❌ MongoDB Error:", err));
+

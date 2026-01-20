@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Seller Dashboard | BookVerse</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="icon" href="/images/favicon.ico">
+</head>
+<body>
+
+<!-- ================= NAVBAR ================= -->
+<header class="navbar">
+  <a href="/" class="logo">
+    <img src="/images/logo.png">
+    <span>BookVerse Seller</span>
+  </a>
+
+  <nav>
+    <a href="/seller" class="active">Dashboard</a>
+    <a href="/books">View Books</a>
+    <button class="btn logout-btn" onclick="logout()">Logout</button>
+  </nav>
+</header>
+
+<!-- ================= SELLER DASHBOARD ================= -->
+<section class="order-section">
+  <div class="order-card">
+
+    <h2>Seller Dashboard</h2>
+    <p class="order-subtitle">
+      Add and remove books from the store
+    </p>
+
+    <!-- ================= ADD BOOK ================= -->
+    <h3 style="margin-top:25px">➕ Add Book</h3>
+
+    <form onsubmit="addBook(event)" style="margin-top:15px">
+
+      <div class="form-group">
+        <label>Book Title</label>
+        <input type="text" id="title" required>
+      </div>
+
+      <div class="form-group">
+        <label>Author</label>
+        <input type="text" id="author" required>
+      </div>
+
+      <div class="form-group">
+        <label>Price (₹)</label>
+        <input type="number" id="price" required>
+      </div>
+
+      <div class="form-group">
+        <label>Quantity</label>
+        <input type="number" id="quantity" min="1" required>
+      </div>
+
+      <button type="submit" class="btn-primary full-btn">
+        Add Book
+      </button>
+    </form>
+
+    <!-- ================= BOOK LIST ================= -->
+    <hr style="margin:35px 0">
+
+    <h3>📚 Your Books</h3>
+    <div id="bookList" style="margin-top:15px"></div>
+  </div>
+</section>
+
+<script>
+/* ================= AUTH GUARD ================= */
+const isLoggedIn = localStorage.getItem("isLoggedIn");
+const role = localStorage.getItem("userRole");
+const sellerId = localStorage.getItem("userId");
+
+if (!isLoggedIn || role !== "seller") {
+  alert("Access denied");
+  window.location.href = "/login";
+}
+
+/* ================= LOGOUT ================= */
+function logout() {
+  localStorage.clear();
+  window.location.href = "/login";
+}
+
+/* ================= ADD BOOK ================= */
+async function addBook(e) {
+  e.preventDefault();
+
+  const data = {
+    title: document.getElementById("title").value,
+    author: document.getElementById("author").value,
+    price: (document.getElementById("price").value),
+    quantity: (document.getElementById("quantity").value),
+    sellerId
+  };
+
+  const res = await fetch("/api/seller/add", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  const result = await res.json();
+
+  if (!res.ok) {
+    alert(result.message || "Failed to add book");
+    return;
+  }
+
+  alert("Book added successfully");
+  e.target.reset();
+  loadBooks();
+}
+
+/* ================= LOAD SELLER BOOKS ================= */
+async function loadBooks() {
+  const res = await fetch(`/api/seller/${sellerId}`);
+  const books = await res.json();
+
+  const div = document.getElementById("bookList");
+  div.innerHTML = "";
+
+  if (!books.length) {
+    div.innerHTML = "<p>No books added yet.</p>";
+    return;
+  }
+
+  books.forEach(book => {
+    div.innerHTML += `
+      <div style="
+        background:#f8fafc;
+        padding:15px;
+        border-radius:10px;
+        margin-bottom:12px;
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+      ">
+        <div>
+          <strong>${book.title}</strong><br>
+          <small>
+            ${book.author} • ₹${book.price} • Qty: ${book.quantity}
+          </small>
+        </div>
+
+        <button class="btn-danger"
+          onclick="deleteBook('${book._id}')">
+          Remove
+        </button>
+      </div>
+    `;
+  });
+}
+
+/* ================= DELETE BOOK ================= */
+async function deleteBook(bookId) {
+  if (!confirm("Remove this book?")) return;
+
+  const res = await fetch(`/api/seller/${bookId}`, {
+    method: "DELETE"
+  });
+
+  if (res.ok) {
+    loadBooks();
+  } else {
+    alert("Failed to remove book");
+  }
+}
+
+loadBooks();
+</script>
+
+</body>
+</html>

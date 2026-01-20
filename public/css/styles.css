@@ -685,3 +685,19 @@ input[type="password"]::-webkit-textfield-decoration-container {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.forgot-link {
+  display: inline-block;
+  font-size: 14px;
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
